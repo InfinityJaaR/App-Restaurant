@@ -1,0 +1,313 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: linear-gradient(45deg, #2c2c2c, #1a1a1a);
+}
+
+.container {
+    position: relative;
+    width: 400px;
+    height: 500px;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    box-shadow: 0 25px 45px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+}
+
+.form-box {
+    position: relative;
+    width: 100%;
+    padding: 40px;
+    transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.signup {
+    position: absolute;
+    top: -30px; /* Valor negativo para subir el formulario */
+    left: 100%;
+    transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    opacity: 0;
+}
+
+.container.active .signup {
+    top: 10px; /* Mantener la misma posición cuando está activo */
+    left: 0;
+    opacity: 1;
+}
+
+.container.active .login {
+    transform: translateX(-100%);
+    opacity: 0;
+}
+
+h2 {
+    color: white;
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.input-field {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.input-field i {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: white;
+}
+
+.input-field input {
+    width: 100%;
+    padding: 12px 40px;
+    border: none;
+    border-radius: 30px;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    outline: none;
+}
+
+.input-field input::placeholder {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.btn {
+    width: 100%;
+    padding: 12px;
+    background: #ffffff;
+    border: none;
+    border-radius: 30px;
+    color: #1a1a1a;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn:hover {
+    background: #2c2c2c;
+    color: white;
+}
+
+.toggle-form {
+    text-align: center;
+    margin-top: 20px;
+    color: white;
+}
+
+.toggle-form a {
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.toggle-form a:hover {
+    text-decoration: underline;
+}
+
+.login {
+    position: absolute;
+    top: 20px; /* Ajusta este valor para bajar más o menos el formulario */
+    width: 100%;
+    padding: 40px;
+    transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+/* Nuevo estilo para el logo */
+.logo-container {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.logo-container img {
+    width: 60px;
+    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.9));
+    height: auto;
+    margin-bottom: 10px;
+}
+
+.signup-phase-2 {
+    display: none;
+}
+
+.signup-phase-2.active {
+    display: block;
+}
+
+.signup-phase-1.inactive {
+    display: none;
+}
+
+.btn-back {
+    margin-top: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.btn-back:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* Media Queries */
+@media screen and (max-width: 480px) {
+    body {
+        align-items: center;
+        padding: 20px 0;
+        min-height: 100vh;
+        height: auto;
+    }
+
+    .container {
+        width: 90%;
+        height: auto;
+        min-height: auto;
+        margin: 0;
+        position: relative;
+        transform: none;
+    }
+
+    .signup {
+        position: absolute;
+        top: 0;
+    }
+
+    .container.active .signup {
+        top: 0;
+    }
+
+    .login {
+        top: 0;
+    }
+
+    .form-box {
+        padding: 25px;
+        height: auto;
+    }
+
+    /* Ajustar el scroll para formularios largos */
+    .signup-phase-1, 
+    .signup-phase-2 {
+        max-height: 80vh;
+        overflow-y: auto;
+        padding-bottom: 20px;
+    }
+
+    /* Mejorar espaciado en móviles */
+    .input-field {
+        margin-bottom: 15px;
+    }
+
+    .btn {
+        margin-bottom: 10px;
+    }
+
+    .toggle-form {
+        margin-top: 15px;
+    }
+
+    .container {
+        width: 90%;
+        height: auto;
+        min-height: 500px;
+        margin: 20px;
+    }
+
+    .form-box {
+        padding: 20px;
+    }
+
+    .input-field {
+        margin-bottom: 15px;
+    }
+
+    .input-field input {
+        padding: 10px 35px;
+    }
+
+    h2 {
+        font-size: 1.5rem;
+        margin-bottom: 20px;
+    }
+
+    .btn {
+        padding: 10px;
+    }
+
+    .logo-container img {
+        width: 50px;
+    }
+
+    .toggle-form {
+        font-size: 0.9rem;
+    }
+}
+
+@media screen and (max-width: 320px) {
+    .container {
+        width: 95%;
+    }
+
+    .form-box {
+        padding: 20px;
+    }
+
+    .container {
+        width: 95%;
+        margin: 10px;
+    }
+
+    .form-box {
+        padding: 15px;
+    }
+
+    h2 {
+        font-size: 1.2rem;
+    }
+
+    .input-field input {
+        font-size: 0.9rem;
+    }
+
+    .btn {
+        font-size: 0.9rem;
+    }
+}
+
+@media screen and (max-height: 600px) {
+    body {
+        padding: 10px 0;
+    }
+
+    .container {
+        margin: 0;
+    }
+
+    .signup-phase-1,
+    .signup-phase-2 {
+        max-height: 85vh;
+    }
+
+    .container {
+        margin: 20px 0;
+    }
+
+    .form-box {
+        padding-top: 15px;
+        padding-bottom: 15px;
+    }
+
+    .input-field {
+        margin-bottom: 10px;
+    }
+}
