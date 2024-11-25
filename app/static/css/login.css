@@ -159,6 +159,28 @@ h2 {
     background: rgba(255, 255, 255, 0.2);
 }
 
+/* Estilos para los mensajes */
+.messages {
+    margin-bottom: 20px;
+}
+
+.message {
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.message.error {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.message.success {
+    background-color: #d4edda;
+    color: #155724;
+}
+
 /* Media Queries */
 @media screen and (max-width: 480px) {
     body {

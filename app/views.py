@@ -4,11 +4,17 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.views.decorators.csrf import csrf_exempt
 from .models import *
+from django.contrib import messages
 
 # Create your views here.
 @login_required
-def index(request):
+def home(request):
     return render(request, 'home.html')
+
+@login_required
+def logout_view(request):
+    logout(request)
+    return redirect('login')
 
 @csrf_exempt
 def registro(request):
@@ -22,12 +28,14 @@ def registro(request):
 
         if password == password2:
             if User.objects.filter(username=email).exists():
-                return HttpResponse('El email ya está registrado')
+                messages.error(request, 'El email ya está registrado')
             else:
                 user = User.objects.create_user(username=email, email=email, password=password, first_name=nombre)
                 user.save()
                 user.groups.set([1])
                 MasCampos.objects.create(user=user, telefono=phone, direccion=address)
+                messages.success(request, 'Registro exitoso. Ahora puedes iniciar sesión.')
                 return redirect('login')
         else:
-            return HttpResponse('Las contraseñas no coinciden')
+            messages.error(request, 'Las contraseñas no coinciden')
+    return render(request, 'login')

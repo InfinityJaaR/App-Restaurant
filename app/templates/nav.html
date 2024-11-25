@@ -1,0 +1,54 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/nav.css' %}">
+    {% block head %}
+    {% endblock %}
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">
+            <a href="{% url 'home' %}" class="brand-link">
+                <img src="{% static 'img/faviconW-SF.png' %}" alt="Logo" class="nav-logo">
+                <span class="nav-title">Queiques</span>
+            </a>
+        </div>
+        
+        <div class="nav-toggle" id="nav-toggle">
+            <i class="fas fa-bars"></i>
+        </div>
+        
+        <ul class="nav-links">
+            <li><a href="/" class="nav-item">
+                <i class="fas fa-home"></i> Inicio
+            </a></li>
+            <li><a href="/menu" class="nav-item">
+                <i class="fas fa-utensils"></i> Menú
+            </a></li>
+            <li><a href="/reservas" class="nav-item">
+                <i class="fas fa-calendar-alt"></i> Reservas
+            </a></li>
+            <li><a href="/contacto" class="nav-item">
+                <i class="fas fa-envelope"></i> Contacto
+            </a></li>
+        </ul>
+    </nav>
+
+    {% block content %}
+    {% endblock %}
+    
+    <script>
+        const navToggle = document.getElementById('nav-toggle');
+        const navLinks = document.querySelector('.nav-links');
+        
+        navToggle.addEventListener('click', () => {
+            navLinks.classList.toggle('show');
+            navToggle.classList.toggle('active');
+        });
+    </script>
+    {% block scripts %}    
+    {% endblock %}  
+</body>
+</html>
