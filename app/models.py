@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User 
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 class MasCampos(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -43,12 +44,21 @@ class Platillo(models.Model):
 
 
 class Pedido(models.Model):
+    TIPO_PAGO_CHOICES = [
+        ("efectivo", "Efectivo"),
+        ("tarjeta", "Tarjeta"),
+    ]
+    
     id_pedido = models.AutoField(primary_key=True)
     usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name="pedidos")
     fecha = models.DateField()
     total = models.DecimalField(max_digits=10, decimal_places=2)
     subtotal = models.DecimalField(max_digits=10, decimal_places=2)
-    tipo_pago = models.CharField(max_length=256)
+    tipo_pago = models.CharField(
+        max_length=256,
+        choices=TIPO_PAGO_CHOICES,
+        default="efectivo"  # Valor predeterminado
+    )
     total_puntos = models.IntegerField()
     estado = models.ForeignKey(Estado, on_delete=models.CASCADE, related_name="pedidos")
 
@@ -83,11 +93,10 @@ class Reclamo(models.Model):
     id_reclamo = models.AutoField(primary_key=True)
     pedido = models.ForeignKey(Pedido, on_delete=models.CASCADE, related_name="reclamos")
     descripcion = models.TextField()
-    fecha = models.DateField(auto_now_add=True)
-    estado = models.CharField(
-        max_length=256,
-        choices=[("pendiente", "Pendiente"), ("resuelto", "Resuelto"), ("rechazado", "Rechazado")],
-        default="pendiente",
+    calificacion = models.IntegerField(
+        validators=[MinValueValidator(1), MaxValueValidator(5)],
+        help_text="Calificación del pedido (1 = Muy malo, 5 = Excelente)",
+        default=3  # Valor predeterminado
     )
 
     def __str__(self):
