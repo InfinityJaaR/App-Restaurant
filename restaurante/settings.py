@@ -43,7 +43,6 @@ INSTALLED_APPS = [
 
     # Aplicaciones propias
     'app.apps.AppConfig',
-    'app', # Registrar la app en el proyecto
 ]
 
 MIDDLEWARE = [
