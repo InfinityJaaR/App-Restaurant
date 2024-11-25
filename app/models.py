@@ -28,7 +28,7 @@ class Platillo(models.Model):
     precio_puntos = models.IntegerField()
     recompensa_puntos = models.IntegerField()
     platillo_dia = models.BooleanField(default=False)
-    disponibilidad = models.BooleanField(default=True)
+    cantidad_maxima = models.IntegerField(default=0)
 
     def __str__(self):
         return self.nombre
