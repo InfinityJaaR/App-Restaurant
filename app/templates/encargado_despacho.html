@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vista Encargado de Despacho</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body class="font-sans bg-gray-100 p-6">
+  <div class="max-w-4xl mx-auto bg-white p-8 rounded-lg shadow-md">
+    <h1 class="text-2xl font-bold mb-6">Encargado de Despacho</h1>
+    
+    <div class="space-y-6">
+      <!-- Lista de Pedidos Pendientes -->
+      <section>
+        <h2 class="text-xl font-semibold mb-4">Pedidos Pendientes</h2>
+        <table class="min-w-full bg-white border border-gray-300">
+          <thead>
+            <tr class="bg-gray-200">
+              <th class="px-4 py-2 text-left border">ID Pedido</th>
+              <th class="px-4 py-2 text-left border">Cliente</th>
+              <th class="px-4 py-2 text-left border">Estado</th>
+              <th class="px-4 py-2 text-left border">Acción</th>
+            </tr>
+          </thead>
+          <tbody id="pedidosPendientes">
+            <!-- Aquí se agregarán dinámicamente los pedidos pendientes -->
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Lista de Pedidos en Preparación -->
+      <section>
+        <h2 class="text-xl font-semibold mt-8 mb-4">Pedidos en Preparación</h2>
+        <table class="min-w-full bg-white border border-gray-300">
+          <thead>
+            <tr class="bg-gray-200">
+              <th class="px-4 py-2 text-left border">ID Pedido</th>
+              <th class="px-4 py-2 text-left border">Cliente</th>
+              <th class="px-4 py-2 text-left border">Estado</th>
+              <th class="px-4 py-2 text-left border">Acción</th>
+            </tr>
+          </thead>
+          <tbody id="pedidosPreparacion">
+            <!-- Aquí se agregarán dinámicamente los pedidos en preparación -->
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Lista de Pedidos Pendientes sin Repartidor -->
+      <section>
+        <h2 class="text-xl font-semibold mt-8 mb-4">Pedidos Pendientes sin Repartidor</h2>
+        <table class="min-w-full bg-white border border-gray-300">
+          <thead>
+            <tr class="bg-gray-200">
+              <th class="px-4 py-2 text-left border">ID Pedido</th>
+              <th class="px-4 py-2 text-left border">Cliente</th>
+              <th class="px-4 py-2 text-left border">Estado</th>
+              <th class="px-4 py-2 text-left border">Acción</th>
+            </tr>
+          </thead>
+          <tbody id="pedidosSinRepartidor">
+            <!-- Aquí se agregarán dinámicamente los pedidos sin repartidor -->
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Lista de Repartidores Disponibles -->
+      <section>
+        <h2 class="text-xl font-semibold mt-8 mb-4">Repartidores Disponibles</h2>
+        <table class="min-w-full bg-white border border-gray-300">
+          <thead>
+            <tr class="bg-gray-200">
+              <th class="px-4 py-2 text-left border">ID Repartidor</th>
+              <th class="px-4 py-2 text-left border">Nombre</th>
+              <th class="px-4 py-2 text-left border">Estado</th>
+            </tr>
+          </thead>
+          <tbody id="repartidoresDisponibles">
+            <!-- Aquí se agregarán dinámicamente los repartidores disponibles -->
+          </tbody>
+        </table>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    // Datos de ejemplo para los pedidos y repartidores
+    const pedidos = [
+      { id: 1, cliente: "Juan Pérez", estado: "Pendiente" },
+      { id: 2, cliente: "María López", estado: "Pendiente" },
+      { id: 3, cliente: "Pedro Ramírez", estado: "En Preparación" },
+      { id: 4, cliente: "Lucía Fernández", estado: "Pendiente - Sin Repartidor" }
+    ];
+
+    const repartidores = [
+      { id: 1, nombre: "Carlos Gómez", estado: "Disponible" },
+      { id: 2, nombre: "Ana Martínez", estado: "Disponible" }
+    ];
+
+    // Referencias a elementos del DOM
+    const pedidosPendientesTable = document.getElementById('pedidosPendientes');
+    const pedidosPreparacionTable = document.getElementById('pedidosPreparacion');
+    const pedidosSinRepartidorTable = document.getElementById('pedidosSinRepartidor');
+    const repartidoresDisponiblesTable = document.getElementById('repartidoresDisponibles');
+
+    let pedidoSeleccionado = null;
+
+    // Cargar pedidos pendientes
+    function cargarPedidos() {
+      pedidosPendientesTable.innerHTML = '';
+      pedidosPreparacionTable.innerHTML = '';
+      pedidosSinRepartidorTable.innerHTML = '';
+      pedidos.forEach(pedido => {
+        const fila = document.createElement('tr');
+        fila.innerHTML = `
+          <td class="border px-4 py-2">${pedido.id}</td>
+          <td class="border px-4 py-2">${pedido.cliente}</td>
+          <td class="border px-4 py-2">${pedido.estado}</td>
+          <td class="border px-4 py-2">
+            ${pedido.estado === 'Pendiente' ? `<button class="enPreparacion bg-yellow-500 text-white px-4 py-2 rounded-md hover:bg-yellow-600">Marcar en Preparación</button>` : ''}
+            ${pedido.estado === 'En Preparación' ? `<button class="listoParaEnvio bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600">Marcar Listo para Envio</button>` : ''}
+          </td>
+        `;
+        if (pedido.estado === 'Pendiente') {
+          fila.querySelector('.enPreparacion').addEventListener('click', () => marcarEnPreparacion(pedido));
+          pedidosPendientesTable.appendChild(fila);
+        } else if (pedido.estado === 'En Preparación') {
+          fila.querySelector('.listoParaEnvio').addEventListener('click', () => marcarListoParaEnvio(pedido));
+          pedidosPreparacionTable.appendChild(fila);
+        } else if (pedido.estado === 'Pendiente - Sin Repartidor') {
+          pedidosSinRepartidorTable.appendChild(fila);
+        }
+      });
+    }
+
+    // Cargar repartidores disponibles
+    function cargarRepartidores() {
+      repartidoresDisponiblesTable.innerHTML = '';
+      repartidores.forEach(repartidor => {
+        if (repartidor.estado === "Disponible") {
+          const fila = document.createElement('tr');
+          fila.innerHTML = `
+            <td class="border px-4 py-2">${repartidor.id}</td>
+            <td class="border px-4 py-2">${repartidor.nombre}</td>
+            <td class="border px-4 py-2">${repartidor.estado}</td>
+          `;
+          repartidoresDisponiblesTable.appendChild(fila);
+        }
+      });
+
+      // Asignar repartidor a pedidos pendientes sin repartidor si hay disponibles
+      const pedidoSinRepartidor = pedidos.find(pedido => pedido.estado === 'Pendiente - Sin Repartidor');
+      const repartidorDisponible = repartidores.find(rep => rep.estado === 'Disponible');
+      if (pedidoSinRepartidor && repartidorDisponible) {
+        repartidorDisponible.estado = 'Ocupado';
+        pedidoSinRepartidor.estado = 'Listo para Envio';
+        Swal.fire({
+          icon: 'success',
+          title: 'Pedido Asignado',
+          text: `Pedido ${pedidoSinRepartidor.id} asignado a ${repartidorDisponible.nombre}`
+        });
+        cargarPedidos();
+        cargarRepartidores();
+      }
+    }
+
+    // Marcar pedido como en preparación
+    function marcarEnPreparacion(pedido) {
+      pedido.estado = "En Preparación";
+      cargarPedidos();
+      Swal.fire({
+        icon: 'success',
+        title: 'Pedido actualizado',
+        text: `El pedido ${pedido.id} ha sido marcado como "En Preparación".`
+      });
+    }
+
+    // Marcar pedido como listo para envío
+    function marcarListoParaEnvio(pedido) {
+      pedido.estado = "Listo para Envio";
+      // Asignar repartidor disponible en orden FIFO
+      const repartidorDisponible = repartidores.find(rep => rep.estado === "Disponible");
+      if (repartidorDisponible) {
+        repartidorDisponible.estado = "Ocupado";
+        Swal.fire({
+          icon: 'success',
+          title: 'Pedido Asignado',
+          text: `Pedido ${pedido.id} asignado a ${repartidorDisponible.nombre}`
+        });
+      } else {
+        pedido.estado = 'Pendiente - Sin Repartidor';
+        Swal.fire({
+          icon: 'warning',
+          title: 'Sin repartidores disponibles',
+          text: `Pedido ${pedido.id} marcado como pendiente, no hay repartidores disponibles.`
+        });
+      }
+      cargarPedidos();
+      cargarRepartidores();
+    }
+
+    // Inicializar la vista
+    cargarPedidos();
+    cargarRepartidores();
+  </script>
+</body>
+</html>
