@@ -19,11 +19,10 @@ document.getElementById('prev-phase').addEventListener('click', function() {
 });
 
 document.getElementById('signup-form').addEventListener('submit', function(e) {
-    e.preventDefault();
     const passwords = document.querySelectorAll('.signup-phase-2 input[type="password"]');
     if (passwords[0].value !== passwords[1].value) {
         alert('Las contraseñas no coinciden');
-        return;
+        e.preventDefault();
     }
     // Aquí puedes agregar el código para enviar el formulario
 });

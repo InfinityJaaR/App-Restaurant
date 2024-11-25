@@ -33,34 +33,35 @@
 
             <div class="form-box signup">
                 <h2>Registrarse</h2>
-                <form id="signup-form">
+                <form id="signup-form" action="{% url 'registro' %}" method="post">
+                    {% csrf_token %}
                     <div class="signup-phase-1">
                         <div class="input-field">
                             <i class="fas fa-user"></i>
-                            <input type="text" placeholder="Nombre completo" required>
+                            <input type="text" placeholder="Nombre completo" name="first_name" required>
                         </div>
                         <div class="input-field">
                             <i class="fas fa-envelope"></i>
-                            <input type="email" placeholder="Correo electrónico" required>
+                            <input type="email" placeholder="Correo electrónico" name="email" required>
                         </div>
                         <div class="input-field">
                             <i class="fas fa-phone"></i>
-                            <input type="tel" placeholder="Teléfono" required>
+                            <input type="tel" placeholder="Teléfono"  name="phone" required>
                         </div>
                         <div class="input-field">
                             <i class="fas fa-map-marker-alt"></i>
-                            <input type="text" placeholder="Dirección" required>
+                            <input type="text" placeholder="Dirección" name="address" required>
                         </div>
                         <button type="button" class="btn" id="next-phase">Siguiente</button>
                     </div>
                     <div class="signup-phase-2">
                         <div class="input-field">
                             <i class="fas fa-lock"></i>
-                            <input type="password" placeholder="Contraseña" required>
+                            <input type="password" placeholder="Contraseña" name="password1" required>
                         </div>
                         <div class="input-field">
                             <i class="fas fa-lock"></i>
-                            <input type="password" placeholder="Confirmar contraseña" required>
+                            <input type="password" placeholder="Confirmar contraseña" name="password2" required>
                         </div>
                         <button type="submit" class="btn">Registrarse</button>
                         <button type="button" class="btn btn-back" id="prev-phase">Volver</button>
