@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registrar Pedido</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="font-sans bg-gray-100 p-6">
+  <div class="max-w-3xl mx-auto bg-white p-8 rounded-lg shadow-md">
+    <h1 class="text-2xl font-bold mb-6">Registrar Pedido</h1>
+    <form id="pedidoForm" method="POST" class="space-y-6">
+      {% csrf_token %}
+      <!-- Información del cliente no registrado -->
+      <fieldset class="border border-gray-300 p-4 rounded-md">
+        <legend class="text-lg font-semibold">Información del Cliente</legend>
+        <div class="mt-4">
+          <label for="nombre_cliente" class="block text-sm font-medium">Nombre:</label>
+          <input type="text" id="nombre_cliente" name="nombre_cliente" required class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+        </div>
+        <div class="mt-4">
+          <label for="telefono_cliente" class="block text-sm font-medium">Teléfono:</label>
+          <input type="text" id="telefono_cliente" name="telefono_cliente" required class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+        </div>
+        <div class="mt-4">
+          <label for="direccion_cliente" class="block text-sm font-medium">Dirección:</label>
+          <input type="text" id="direccion_cliente" name="direccion_cliente" required class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+        </div>
+      </fieldset>
+
+      <!-- Detalles del Pedido -->
+      <fieldset class="border border-gray-300 p-4 rounded-md">
+        <legend class="text-lg font-semibold">Detalles del Pedido</legend>
+        <div class="mt-4">
+          <label for="tipo_pago" class="block text-sm font-medium">Tipo de Pago:</label>
+          <select id="tipo_pago" name="tipo_pago" required class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+            <option value="efectivo">Efectivo</option>
+            <option value="tarjeta">Tarjeta</option>
+          </select>
+        </div>
+      </fieldset>
+
+      <!-- Agregar Platillos -->
+      <fieldset class="border border-gray-300 p-4 rounded-md">
+        <legend class="text-lg font-semibold">Agregar Platillos</legend>
+        <div class="flex items-center space-x-4">
+          <div class="w-1/2">
+            <label for="platillo" class="block text-sm font-medium">Platillo:</label>
+            <select id="platillo" name="platillo" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+              {% for platillo in platillos %}
+                <option value="{{ platillo.id }}" data-precio="{{ platillo.precio }}">{{ platillo.nombre }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="w-1/4">
+            <label for="cantidad" class="block text-sm font-medium">Cantidad:</label>
+            <input type="number" id="cantidad" name="cantidad" min="1" value="1" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+          </div>
+          <div class="w-1/4">
+            <button type="button" id="agregarPlatillo" class="mt-6 w-full bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600">Agregar Platillo</button>
+          </div>
+        </div>
+      </fieldset>
+
+      <!-- Tabla de Platillos -->
+      <div class="overflow-x-auto">
+        <table id="lineasPedido" class="min-w-full bg-white mt-4 border border-gray-300">
+          <thead>
+            <tr class="bg-gray-200">
+              <th class="px-4 py-2 text-left border">Platillo</th>
+              <th class="px-4 py-2 text-left border">Cantidad</th>
+              <th class="px-4 py-2 text-left border">Precio Unitario</th>
+              <th class="px-4 py-2 text-left border">Total</th>
+              <th class="px-4 py-2 text-left border">Acción</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Aquí se agregarán dinámicamente las líneas de pedido -->
+          </tbody>
+        </table>
+      </div>
+
+      <div class="mt-4">
+        <p class="text-lg font-semibold">Subtotal: <span id="subtotal" class="text-gray-700">$0.00</span></p>
+        <p class="text-lg font-semibold">Total: <span id="total" class="text-gray-700">$0.00</span></p>
+      </div>
+
+      <button type="submit" class="w-full bg-green-500 text-white p-3 rounded-md hover:bg-green-600">Registrar Pedido</button>
+    </form>
+  </div>
+
+  <script>
+    const platilloSelect = document.getElementById('platillo');
+    const cantidadInput = document.getElementById('cantidad');
+    const agregarPlatilloBtn = document.getElementById('agregarPlatillo');
+    const lineasPedidoTable = document.getElementById('lineasPedido').querySelector('tbody');
+    const subtotalSpan = document.getElementById('subtotal');
+    const totalSpan = document.getElementById('total');
+
+    let subtotal = 0;
+
+    agregarPlatilloBtn.addEventListener('click', () => {
+      const platilloId = platilloSelect.value;
+      const platilloNombre = platilloSelect.options[platilloSelect.selectedIndex].text;
+      const precioUnitario = parseFloat(platilloSelect.options[platilloSelect.selectedIndex].dataset.precio);
+      const cantidad = parseInt(cantidadInput.value);
+
+      if (cantidad < 1) {
+        alert("La cantidad debe ser al menos 1.");
+        return;
+      }
+
+      const totalLinea = precioUnitario * cantidad;
+      subtotal += totalLinea;
+
+      const nuevaFila = document.createElement('tr');
+      nuevaFila.innerHTML = `
+        <td class="border px-4 py-2">${platilloNombre}</td>
+        <td class="border px-4 py-2">${cantidad}</td>
+        <td class="border px-4 py-2">$${precioUnitario.toFixed(2)}</td>
+        <td class="border px-4 py-2">$${totalLinea.toFixed(2)}</td>
+        <td class="border px-4 py-2"><button type="button" class="eliminarLinea bg-red-500 text-white px-2 py-1 rounded-md hover:bg-red-600">Eliminar</button></td>
+      `;
+      lineasPedidoTable.appendChild(nuevaFila);
+
+      // Actualizar subtotal y total
+      subtotalSpan.textContent = subtotal.toFixed(2);
+      totalSpan.textContent = subtotal.toFixed(2);
+
+      // Agregar funcionalidad al botón de eliminar
+      nuevaFila.querySelector('.eliminarLinea').addEventListener('click', () => {
+        subtotal -= totalLinea;
+        subtotalSpan.textContent = subtotal.toFixed(2);
+        totalSpan.textContent = subtotal.toFixed(2);
+        nuevaFila.remove();
+      });
+    });
+  </script>
+</body>
+</html>

@@ -43,27 +43,53 @@ class Platillo(models.Model):
         return self.nombre
 
 
+class DetallesCliente(models.Model):
+    nombre = models.CharField(max_length=255)
+    telefono = models.CharField(max_length=15)
+    direccion = models.CharField(max_length=255)
+
+    def __str__(self):
+        return f"{self.nombre} - {self.telefono}"
+
+
 class Pedido(models.Model):
     TIPO_PAGO_CHOICES = [
         ("efectivo", "Efectivo"),
         ("tarjeta", "Tarjeta"),
     ]
-    
+
     id_pedido = models.AutoField(primary_key=True)
-    usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name="pedidos")
-    fecha = models.DateField()
+    usuario = models.ForeignKey(
+        User, 
+        on_delete=models.CASCADE, 
+        related_name="pedidos", 
+        null=True, 
+        blank=True  # Opcional para clientes registrados
+    )
+    detalles_cliente = models.OneToOneField(
+        DetallesCliente, 
+        on_delete=models.CASCADE, 
+        null=True, 
+        blank=True  # Opcional para clientes no registrados
+    )
+    fecha = models.DateField(auto_now_add=True)
     total = models.DecimalField(max_digits=10, decimal_places=2)
     subtotal = models.DecimalField(max_digits=10, decimal_places=2)
     tipo_pago = models.CharField(
         max_length=256,
         choices=TIPO_PAGO_CHOICES,
-        default="efectivo"  # Valor predeterminado
+        default="efectivo"
     )
-    total_puntos = models.IntegerField()
-    estado = models.ForeignKey(Estado, on_delete=models.CASCADE, related_name="pedidos")
+    total_puntos = models.IntegerField(default=0)
+    estado = models.ForeignKey('Estado', on_delete=models.CASCADE, related_name="pedidos")
 
     def __str__(self):
-        return f"Pedido {self.id_pedido} de {self.usuario}"
+        if self.usuario:
+            return f"Pedido {self.id_pedido} - Usuario: {self.usuario.username}"
+        elif self.detalles_cliente:
+            return f"Pedido {self.id_pedido} - Cliente: {self.detalles_cliente.nombre}"
+        else:
+            return f"Pedido {self.id_pedido}"
 
 
 class LineaPedidos(models.Model):
