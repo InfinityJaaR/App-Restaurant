@@ -39,3 +39,8 @@ def registro(request):
         else:
             messages.error(request, 'Las contraseñas no coinciden')
     return render(request, 'login')
+
+# create views repartidor
+@login_required
+def perfil(request):
+    return render(request, 'Repartidor/perfil.html')
