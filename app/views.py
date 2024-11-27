@@ -131,4 +131,14 @@ def detalle_pedido(request, id_pedido):
         return redirect('pedidos')
         
     return render(request, 'Repartidor/detalle_pedido.html', {'pedido': pedido})
+
+@login_required
+def nuevoUsuario (request):
+    if request.method == 'POST':
+        nombre = request.POST['first_name']
+        email = request.POST['email']
+        phone = request.POST['phone']
+        password = request.POST['password1']
+        password2 = request.POST['password2']
+        groups = request.POST['groups']
 >>>>>>> origin/main
