@@ -1,0 +1,91 @@
+{% extends 'nav.html' %}
+{% load static %}
+{% block head %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalle del Pedido</title>
+    <link rel="stylesheet" href="{% static 'css/pedido_Repartidors.css' %}">
+{% endblock %}
+
+{% block content %}
+    <div class="pedidos-container">
+        <div class="pedidos-card">
+            <h2 class="mb-4">Detalle del Pedido</h2>
+            
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label class="form-label">Pedido:</label>
+                    <input type="text" class="form-control" value="#{{ pedido.id_pedido }}" readonly>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Fecha:</label>
+                    <input type="text" class="form-control" value="{{ pedido.fecha }}" readonly>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label class="form-label">Cliente:</label>
+                    <input type="text" class="form-control" value="{{ pedido.usuario.first_name }}" readonly>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Teléfono:</label>
+                    <input type="text" class="form-control" value="{{ pedido.usuario.mascampos.telefono }}" readonly>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label class="form-label">Dirección:</label>
+                    <input type="text" class="form-control" value="{{ pedido.usuario.mascampos.direccion }}" readonly>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Forma de Pago:</label>
+                    <input type="text" class="form-control" value="{{ pedido.tipo_pago }}" readonly>
+                </div>
+            </div>
+
+            <div class="table-responsive mb-4">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Platillo</th>
+                            <th>Cantidad</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for linea in pedido.lineas.all %}
+                        <tr>
+                            <td>{{ linea.platillo.nombre }}</td>
+                            <td>{{ linea.cantidad }}</td>
+                            <td>${{ linea.total_orden }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6 offset-md-6">
+                    <label class="form-label">Total:</label>
+                    <input type="text" class="form-control" value="${{ pedido.total }}" readonly>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-end">
+                <a href="{% url 'pedidos' %}" class="btn btn-secondary me-2">Regresar</a>
+                <form method="POST" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-primary" onclick="return confirm('¿Está seguro que desea marcar este pedido como entregado?')">
+                        Entregar Pedido
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'js/detalle_pedido.js' %}"></script>
+{% endblock %}

@@ -39,3 +39,40 @@ def registro(request):
         else:
             messages.error(request, 'Las contraseñas no coinciden')
     return render(request, 'login')
+
+# create views repartidor
+# create views perfil de repartidor
+@login_required
+def perfil(request):
+    if request.method == 'POST':
+        nuevo_estado = request.POST.get('disponibilidad')
+        request.user.mascampos.is_active = bool(int(nuevo_estado))
+        request.user.mascampos.save()  # Save the MasCampos instance
+        messages.success(request, 'Estado actualizado correctamente')
+        return redirect('repartidor')
+
+    return render(request, 'Repartidor/perfil.html', {'user': request.user})
+# create views pedidos de repartidor
+@login_required
+def pedidos(request):
+    if request.method == 'POST':
+        pedido = Pedido.objects.get(id_pedido=request.POST.get('id_pedido'))
+        pedido.estado = Estado.objects.get(id_estado=1)  # Cambiado a 1 para marcar como entregado
+        pedido.save()
+        messages.success(request, 'Pedido entregado correctamente')
+        return redirect('pedidos')
+
+    pedidos_asignados = Pedido.objects.filter(usuario=request.user)
+    return render(request, 'Repartidor/pedido.html', {'pedidos': pedidos_asignados})
+# create views detalle de pedido
+@login_required
+def detalle_pedido(request, id_pedido):
+    pedido = Pedido.objects.get(id_pedido=id_pedido)
+    
+    if request.method == 'POST':
+        pedido.estado = Estado.objects.get(id_estado=3)  # 1 = Entregado
+        pedido.save()
+        messages.success(request, 'Pedido entregado correctamente')
+        return redirect('pedidos')
+        
+    return render(request, 'Repartidor/detalle_pedido.html', {'pedido': pedido})

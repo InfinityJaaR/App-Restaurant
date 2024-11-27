@@ -6,6 +6,7 @@ class MasCampos(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     telefono = models.CharField(max_length=15)
     direccion = models.CharField(max_length=255)
+    is_active = models.BooleanField(default=False)
 
     def __str__(self):
         return self.user.username
