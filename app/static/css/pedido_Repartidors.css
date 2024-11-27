@@ -1,0 +1,51 @@
+/* Estilos base del contenedor (movidos desde perfil_Repartidor.css) */
+.pedidos-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 20px;
+}
+
+.pedidos-card {
+    background-color: #f8f9fa;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    margin-bottom: 3rem;
+}
+
+.form-label {
+    font-weight: bold;
+}
+
+/* Estilos específicos de las tablas */
+.table-container {
+    margin-bottom: 4rem;  /* Aumentado de 2rem a 4rem */
+}
+
+.table th {
+    background-color: #f8f9fa;
+}
+
+/* Estilos para los bordes de la tabla */
+.table {
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.table th,
+.table td {
+    border: 1px solid #dee2e6;
+    padding: 1rem;
+    vertical-align: middle;
+    text-align: center;
+}
+
+.table thead th {
+    border-bottom: 2px solid #dee2e6;
+    background-color: #f8f9fa;
+    font-weight: bold;
+}
+
+.btn-factura {
+    padding: 0.25rem 0.5rem;
+}
