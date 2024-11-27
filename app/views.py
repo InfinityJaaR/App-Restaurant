@@ -56,7 +56,6 @@ def registro(request):
             messages.error(request, 'Las contraseñas no coinciden')
     return render(request, 'login')
 
-<<<<<<< HEAD
 @login_required
 def nuevoUsuario(request):
     if request.method == 'POST':
@@ -94,7 +93,6 @@ def gestionarUsuario(request):
         'grupos': grupos
     }
     return render(request, 'Administrador/gestionarUsuario.html', context)
-=======
 # create views repartidor
 # create views perfil de repartidor
 @login_required
@@ -132,13 +130,4 @@ def detalle_pedido(request, id_pedido):
         
     return render(request, 'Repartidor/detalle_pedido.html', {'pedido': pedido})
 
-@login_required
-def nuevoUsuario (request):
-    if request.method == 'POST':
-        nombre = request.POST['first_name']
-        email = request.POST['email']
-        phone = request.POST['phone']
-        password = request.POST['password1']
-        password2 = request.POST['password2']
-        groups = request.POST['groups']
->>>>>>> origin/main
+
