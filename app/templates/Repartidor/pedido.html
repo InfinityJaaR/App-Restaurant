@@ -1,10 +1,76 @@
 {% extends 'nav.html' %}
+{% load static %}
 {% block head %}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Pedidos</title>
+    <link rel="stylesheet" href="{% static 'css/pedido_Repartidors.css' %}">
 {% endblock %}
 
 {% block content %}
-    <h1>Esto es una prueba</h1>
+    <div class="pedidos-container">
+        <!-- Pedidos por Entregar -->
+        <div class="pedidos-card table-container">
+            <h2 class="mb-4">Pedidos por Entregar</h2>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Pedido</th>
+                            <th>Fecha</th>
+                            <th>Estado Pedido</th>
+                            <th>Total</th>
+                            <th>Factura</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for pedido in pedidos %}
+                        {% if pedido.estado.id_estado == 2 %}
+                        <tr>
+                            <td>#{{ pedido.id_pedido }}</td>
+                            <td>{{ pedido.fecha }}</td>
+                            <td>{{ pedido.estado.nombre }}</td>
+                            <td>${{ pedido.total }}</td>
+                            <td>
+                                <a href="{% url 'detalle_pedido' pedido.id_pedido %}" class="btn btn-primary btn-factura">
+                                    <i class="fas fa-file-invoice"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endif %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Pedidos Entregados -->
+        <div class="pedidos-card table-container">
+            <h2 class="mb-4">Pedidos Entregados</h2>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Pedido</th>
+                            <th>Fecha</th>
+                            <th>Estado Pedido</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for pedido in pedidos %}
+                        {% if pedido.estado.id_estado == 1 %}
+                        <tr>
+                            <td>#{{ pedido.id_pedido }}</td>
+                            <td>{{ pedido.fecha }}</td>
+                            <td>{{ pedido.estado.nombre }}</td>
+                            <td>${{ pedido.total }}</td>
+                        </tr>
+                        {% endif %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 {% endblock %}

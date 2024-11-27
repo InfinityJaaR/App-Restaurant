@@ -1,12 +1,51 @@
 {% extends 'nav.html' %}
+{% load static %}
 {% block head %}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <link rel="stylesheet" href="{% static 'css/perfil_Repartidor.css' %}">
 {% endblock %}
 
 {% block content %}
-    <div>
-        <h1>Esto es una prueba</h1>
+    <div class="profile-container">
+        <div class="profile-info">
+            <h2 class="mb-4">Perfil del Repartidor</h2>
+            <form action="{% url 'repartidor' %}" method="POST">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label class="form-label">Nombre:</label>
+                    <input type="text" name="nombre" class="form-control" value="{{ user.first_name }}" readonly>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Carnet:</label>
+                    <input type="text" name="carnet" class="form-control" value="12345678" readonly>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Email:</label>
+                    <input type="email" name="email" class="form-control" value="{{ user.email }}" readonly>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Teléfono:</label>
+                    <input type="tel" name="telefono" class="form-control" value="{{ user.mascampos.telefono }}" readonly>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Estado:</label>
+                    <div class="input-group">
+                        <select class="form-select" id="disponibilidad" name="disponibilidad">
+                            <option value="1" {% if user.mascampos.is_active %}selected{% endif %}>Disponible</option>
+                            <option value="0" {% if not user.mascampos.is_active %}selected{% endif %}>No Disponible</option>
+                        </select>
+                        <button class="btn btn-primary" type="submit">Actualizar Estado</button>
+                    </div>
+                </div>
+            </form>
+        </div>
     </div>
+{% endblock %}
+
+{% block scripts %}
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 {% endblock %}
