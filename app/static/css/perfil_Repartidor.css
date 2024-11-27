@@ -1,0 +1,14 @@
+.profile-container {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 20px;
+}
+.profile-info {
+    background-color: #f8f9fa;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+.form-label {
+    font-weight: bold;
+}
