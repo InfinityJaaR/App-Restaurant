@@ -1,0 +1,74 @@
+{% extends 'nav.html' %}
+{% load static %}
+
+{% block head %}
+    <title>Gestionar Usuarios</title>
+    <link rel="stylesheet" href="{% static 'css/gestionarUsuario.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="content-wrapper">
+        <div class="titulo">
+            <h1>Gestión de Usuarios</h1>
+        </div>
+        <div class="header">
+            <div class="filters">
+                <div class="group">
+                    <select id="groupFilter" class="input">
+                        <option value="">Todos los roles</option>
+                        {% for grupo in grupos %}
+                        <option value="{{ grupo.name }}">{{ grupo.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="group">
+                    <svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><g><path d="M21.53 20.47l-3.66-3.66C19.195 15.24 20 13.214 20 11c0-4.97-4.03-9-9-9s-9 4.03-9 9 4.03 9 9 9c2.215 0 4.24-.804 5.808-2.13l3.66 3.66c.147.146.34.22.53.22s.385-.073.53-.22c.295-.293.295-.767.002-1.06zM3.5 11c0-4.135 3.365-7.5 7.5-7.5s7.5 3.365 7.5 7.5-3.365 7.5-7.5 7.5-7.5-3.365-7.5-7.5z"></path></g></svg>
+                    <input placeholder="Buscar" type="text" id="searchInput" class="input">
+                </div>
+            </div>
+            <a href="{% url 'nuevoUsuario' %}" class="btn-add">
+                <i class="fa-solid fa-user-plus"></i> Nuevo Usuario
+            </a>
+        </div>
+
+        <div class="table-container">
+            <table class="users-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Teléfono</th>
+                        <th>Rol</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for usuario in usuarios %}
+                    <tr>
+                        <td>{{ usuario.id }}</td>
+                        <td>{{ usuario.first_name }}</td>
+                        <td>{{ usuario.mascampos.telefono }}</td>
+                        <td>{{ usuario.groups.first.name }}</td>
+                        <td class="actions">
+                            <button class="btn-action edit" title="Editar">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn-action delete" title="Eliminar">
+                                <i class="fa-solid fa-user-minus"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <div class="pagination"></div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+    <script src="{% static 'js/gestionarUsuario.js' %}"></script>
+{% endblock %}

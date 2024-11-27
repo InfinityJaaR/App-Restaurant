@@ -28,7 +28,7 @@
                 <i class="fas fa-home"></i> Inicio
             </a></li>
             {% if user.groups.all.0.name == 'Administrador' %}
-            <li><a href="/usuarios" class="nav-item">
+            <li><a href="{% url 'gestionarUsuario' %}" class="nav-item">
                 <i class="fas fa-users"></i> Usuarios
             </a></li>
             <li><a href="/descuentos" class="nav-item">

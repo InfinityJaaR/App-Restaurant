@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group  # Agregar Group aquí
 from django.views.decorators.csrf import csrf_exempt
 from .models import *
 from django.contrib import messages
@@ -57,7 +57,7 @@ def registro(request):
     return render(request, 'login')
 
 @login_required
-def nuevoUsuario (request):
+def nuevoUsuario(request):
     if request.method == 'POST':
         nombre = request.POST['first_name']
         email = request.POST['email']
@@ -65,3 +65,31 @@ def nuevoUsuario (request):
         password = request.POST['password1']
         password2 = request.POST['password2']
         groups = request.POST['groups']
+
+        if password == password2:
+            if User.objects.filter(username=email).exists():
+                messages.error(request, 'El email ya está registrado')
+            else:
+                user = User.objects.create_user(username=email, email=email, password=password, first_name=nombre)
+                user.save()
+                user.groups.set([groups])
+                MasCampos.objects.create(user=user, telefono=phone)
+                messages.success(request, 'Usuario creado exitosamente')
+                return redirect('gestionarUsuario')
+        else:
+            messages.error(request, 'Las contraseñas no coinciden')
+    
+    grupos = Group.objects.exclude(id__in=[1, 2])  # Excluye grupos Cliente (1) y Administrador (2)
+    return render(request, 'Administrador/nuevoUsuario.html', {'grupos': grupos})
+
+@login_required
+def gestionarUsuario(request):
+    # Excluye usuarios de los grupos Cliente (1), Administrador (2) y superusuario
+    usuarios = User.objects.exclude(groups__in=[1, 2]).exclude(is_superuser=True).select_related('mascampos').prefetch_related('groups')
+    grupos = Group.objects.exclude(id__in=[1, 2])  # Excluye grupos Cliente y Administrador
+    
+    context = {
+        'usuarios': usuarios,
+        'grupos': grupos
+    }
+    return render(request, 'Administrador/gestionarUsuario.html', context)
