@@ -27,14 +27,24 @@
             <li><a href="{% url 'home' %}" class="nav-item">
                 <i class="fas fa-home"></i> Inicio
             </a></li>
+            {% if user.groups.all.0.name == 'Administrador' %}
+            <li><a href="/usuarios" class="nav-item">
+                <i class="fas fa-users"></i> Usuarios
+            </a></li>
+            <li><a href="/descuentos" class="nav-item">
+                <i class="fas fa-percent"></i> Descuentos
+            </a></li>
+            {% endif %}
+            {% if user.groups.all.0.name == 'Encargado de Menu' %}
             <li><a href="/menu" class="nav-item">
                 <i class="fas fa-utensils"></i> Menú
             </a></li>
             <li><a href="/reservas" class="nav-item">
-                <i class="fas fa-calendar-alt"></i> Reservas
+                <i class="bi bi-journals"></i> Cátalogo
             </a></li>
-            <li><a href="/contacto" class="nav-item">
-                <i class="fas fa-envelope"></i> Contacto
+            {% endif %}
+            <li><a href="{% url 'logout' %}" class="nav-item">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i> Cerrar Sesión
             </a></li>
         </ul>
     </nav>
