@@ -6,6 +6,7 @@ from django.views.decorators.csrf import csrf_exempt
 from .models import *
 from django.contrib import messages
 from django.contrib.auth import logout
+from django.core.paginator import Paginator
 
 # Create your views here.
 @login_required
@@ -110,28 +111,28 @@ def perfil(request):
 def pedidos(request):
     if request.method == 'POST':
         pedido = Pedido.objects.get(id_pedido=request.POST.get('id_pedido'))
-        pedido.estado = Estado.objects.get(id_estado=1)  # Cambiado a 1 para marcar como entregado
+        pedido.estado = Estado.objects.get(id_estado=3)  # Cambiado a 3 para marcar como entregado
         pedido.save()
         messages.success(request, 'Pedido entregado correctamente')
         return redirect('pedidos')
 
     pedidos_asignados = Pedido.objects.filter(usuario=request.user)
-    return render(request, 'Repartidor/pedido.html', {'pedidos': pedidos_asignados})
+    pedidos_entregados = pedidos_asignados.filter(estado__id_estado=3)
+    
+    return render(request, 'Repartidor/pedido.html', {'pedidos': pedidos_asignados, 'pedidos_entregados': pedidos_entregados})
 # create views detalle de pedido
 @login_required
 def detalle_pedido(request, id_pedido):
     pedido = Pedido.objects.get(id_pedido=id_pedido)
     
     if request.method == 'POST':
-        pedido.estado = Estado.objects.get(id_estado=3)  # 1 = Entregado
+        pedido.estado = Estado.objects.get(id_estado=3)  # 3 = Entregado
         pedido.save()
         messages.success(request, 'Pedido entregado correctamente')
         return redirect('pedidos')
         
-<<<<<<< HEAD
     return render(request, 'Repartidor/detalle_pedido.html', {'pedido': pedido})
 
 
-=======
-    return render(request, 'Repartidor/detalle_pedido.html', {'pedido': pedido})
->>>>>>> 513747aa4111c24c5bda7786f24073102da62fb2
+
+
