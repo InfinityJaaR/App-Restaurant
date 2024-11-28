@@ -29,6 +29,23 @@
             <li><a href="{% url 'home' %}" class="nav-item">
                 <i class="fas fa-home"></i> Inicio
             </a></li>
+            {% if user.groups.all.0.name == 'Repartidor' %}
+            <li><a href="{% url 'repartidor' %}" class="nav-item">
+                <i class="fa-solid fa-user"></i> Perfil
+            </a></li>
+            <li><a href="{% url 'pedidos' %}" class="nav-item">
+                <i class="fa-solid fa-truck-fast"></i> Pedidos
+            </a></li>
+            {% endif %}
+            {% if user.groups.all.0.name == 'Administrador' %}
+            <li><a href="/usuarios" class="nav-item">
+                <i class="fas fa-users"></i> Usuarios
+            </a></li>
+            <li><a href="/descuentos" class="nav-item">
+                <i class="fas fa-percent"></i> Descuentos
+            </a></li>
+            {% endif %}
+
             {% if user.groups.all.0.name == 'Administrador' %}
             <li><a href="{% url 'gestionarUsuario' %}" class="nav-item">
                 <i class="fas fa-users"></i> Usuarios
@@ -47,12 +64,6 @@
             {% endif %}
             <li><a href="{% url 'logout' %}" class="nav-item">
                 <i class="fa-solid fa-arrow-right-from-bracket"></i> Cerrar Sesión
-            </a></li>
-            <li><a href="{% url 'repartidor' %}" class="nav-item">
-                <i class="fa-solid fa-user"></i> Perfil
-            </a></li>
-            <li><a href="{% url 'pedidos' %}" class="nav-item">
-                <i class="fa-solid fa-truck-fast"></i> Pedidos
             </a></li>
         </ul>
     </nav>
