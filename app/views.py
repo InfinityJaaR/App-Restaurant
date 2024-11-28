@@ -6,6 +6,7 @@ from django.views.decorators.csrf import csrf_exempt
 from .models import *
 from django.contrib import messages
 from django.contrib.auth import logout
+from django.core.paginator import Paginator
 
 # Create your views here.
 @login_required
@@ -56,7 +57,6 @@ def registro(request):
             messages.error(request, 'Las contraseñas no coinciden')
     return render(request, 'login')
 
-<<<<<<< HEAD
 @login_required
 def nuevoUsuario(request):
     if request.method == 'POST':
@@ -94,7 +94,6 @@ def gestionarUsuario(request):
         'grupos': grupos
     }
     return render(request, 'Administrador/gestionarUsuario.html', context)
-=======
 # create views repartidor
 # create views perfil de repartidor
 @login_required
@@ -112,33 +111,25 @@ def perfil(request):
 def pedidos(request):
     if request.method == 'POST':
         pedido = Pedido.objects.get(id_pedido=request.POST.get('id_pedido'))
-        pedido.estado = Estado.objects.get(id_estado=1)  # Cambiado a 1 para marcar como entregado
+        pedido.estado = Estado.objects.get(id_estado=3)  # Cambiado a 3 para marcar como entregado
         pedido.save()
         messages.success(request, 'Pedido entregado correctamente')
         return redirect('pedidos')
 
     pedidos_asignados = Pedido.objects.filter(usuario=request.user)
-    return render(request, 'Repartidor/pedido.html', {'pedidos': pedidos_asignados})
+    pedidos_entregados = pedidos_asignados.filter(estado__id_estado=3)
+    
+    return render(request, 'Repartidor/pedido.html', {'pedidos': pedidos_asignados, 'pedidos_entregados': pedidos_entregados})
 # create views detalle de pedido
 @login_required
 def detalle_pedido(request, id_pedido):
     pedido = Pedido.objects.get(id_pedido=id_pedido)
     
     if request.method == 'POST':
-        pedido.estado = Estado.objects.get(id_estado=3)  # 1 = Entregado
+        pedido.estado = Estado.objects.get(id_estado=3)  # 3 = Entregado
         pedido.save()
         messages.success(request, 'Pedido entregado correctamente')
         return redirect('pedidos')
         
     return render(request, 'Repartidor/detalle_pedido.html', {'pedido': pedido})
 
-@login_required
-def nuevoUsuario (request):
-    if request.method == 'POST':
-        nombre = request.POST['first_name']
-        email = request.POST['email']
-        phone = request.POST['phone']
-        password = request.POST['password1']
-        password2 = request.POST['password2']
-        groups = request.POST['groups']
->>>>>>> origin/main

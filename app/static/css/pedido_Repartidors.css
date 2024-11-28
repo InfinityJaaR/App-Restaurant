@@ -49,3 +49,51 @@
 .btn-factura {
     padding: 0.25rem 0.5rem;
 }
+
+/* Nuevo estilo de paginación basado en gestionarUsuario */
+#pagination-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 2rem;
+    gap: 0.5rem;
+}
+
+.page-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 40px;
+    height: 40px;
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    color: #333;
+    font-weight: 500;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.page-link:hover {
+    background-color: #f0f0f0;
+    border-color: #d0d0d0;
+    color: #000;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.page-link.active {
+    background-color: #007bff;
+    border-color: #007bff;
+    color: white;
+}
+
+.page-arrow {
+    background-color: #f8f9fa;
+    font-size: 1.2em;
+    padding: 0 15px;
+}
+
+.page-arrow:hover {
+    background-color: #e9ecef;
+}
