@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User, Group  # Agregar Group aquí
+from django.contrib.auth.models import User, Group
 from django.views.decorators.csrf import csrf_exempt
 from .models import *
 from django.contrib import messages
@@ -128,6 +128,10 @@ def detalle_pedido(request, id_pedido):
         messages.success(request, 'Pedido entregado correctamente')
         return redirect('pedidos')
         
+<<<<<<< HEAD
     return render(request, 'Repartidor/detalle_pedido.html', {'pedido': pedido})
 
 
+=======
+    return render(request, 'Repartidor/detalle_pedido.html', {'pedido': pedido})
+>>>>>>> 513747aa4111c24c5bda7786f24073102da62fb2
