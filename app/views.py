@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User, Group  # Agregar Group aquí
+from django.contrib.auth.models import User, Group
 from django.views.decorators.csrf import csrf_exempt
 from .models import *
 from django.contrib import messages
