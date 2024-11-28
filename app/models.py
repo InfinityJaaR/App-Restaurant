@@ -4,8 +4,9 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 
 class MasCampos(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    telefono = models.CharField(max_length=15)
-    direccion = models.CharField(max_length=255)
+    carnet = models.CharField(max_length=8, default='00000000')
+    telefono = models.CharField(max_length=9, default='000000000')
+    direccion = models.CharField(max_length=255, default='Sin dirección', blank=True)
     is_active = models.BooleanField(default=False)
 
     def __str__(self):

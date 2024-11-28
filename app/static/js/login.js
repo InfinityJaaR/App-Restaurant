@@ -18,11 +18,35 @@ document.getElementById('prev-phase').addEventListener('click', function() {
     document.querySelector('.signup-phase-2').classList.remove('active');
 });
 
-document.getElementById('signup-form').addEventListener('submit', function(e) {
-    const passwords = document.querySelectorAll('.signup-phase-2 input[type="password"]');
-    if (passwords[0].value !== passwords[1].value) {
-        alert('Las contraseñas no coinciden');
-        e.preventDefault();
-    }
-    // Aquí puedes agregar el código para enviar el formulario
+document.addEventListener('DOMContentLoaded', function() {
+    const phoneInput = document.querySelector('input[name="phone"]');
+    const phoneMask = IMask(phoneInput, {
+        mask: '0000-0000',
+        lazy: true,  // Cambiar a true para que no muestre la máscara inicialmente
+    });
+
+    document.getElementById('signup-form').addEventListener('submit', function(e) {
+        // Validación del teléfono
+        if (!phoneMask.masked.isComplete) {
+            e.preventDefault();
+            alert('Por favor ingrese un número de teléfono válido de 8 dígitos');
+            return;
+        }
+
+        // Validación del email
+        const email = document.querySelector('input[name="email"]').value;
+        if (!email.includes('@') || !email.includes('.com')) {
+            e.preventDefault();
+            alert('El email debe contener @ y .com');
+            return;
+        }
+
+        // Validación de contraseñas
+        const passwords = document.querySelectorAll('.signup-phase-2 input[type="password"]');
+        if (passwords[0].value !== passwords[1].value) {
+            e.preventDefault();
+            alert('Las contraseñas no coinciden');
+            return;
+        }
+    });
 });

@@ -57,30 +57,56 @@ def registro(request):
     return render(request, 'login')
 
 @login_required
-def nuevoUsuario(request):
+def nuevoUsuario(request, id=None):
+    if id:
+        user = User.objects.get(id=id)
+        mascampos = MasCampos.objects.get(user=user)
+    else:
+        user = None
+        mascampos = None
+
     if request.method == 'POST':
         nombre = request.POST['first_name']
         email = request.POST['email']
         phone = request.POST['phone']
+        carnet = request.POST['carnet']
         password = request.POST['password1']
         password2 = request.POST['password2']
         groups = request.POST['groups']
 
         if password == password2:
-            if User.objects.filter(username=email).exists():
-                messages.error(request, 'El email ya está registrado')
-            else:
-                user = User.objects.create_user(username=email, email=email, password=password, first_name=nombre)
+            if user:
+                user.first_name = nombre
+                user.email = email
+                user.username = email
+                if password:
+                    user.set_password(password)
                 user.save()
                 user.groups.set([groups])
-                MasCampos.objects.create(user=user, telefono=phone)
-                messages.success(request, 'Usuario creado exitosamente')
-                return redirect('gestionarUsuario')
+                mascampos.telefono = phone
+                mascampos.carnet = carnet
+                mascampos.save()
+                messages.success(request, 'Usuario actualizado exitosamente')
+            else:
+                if User.objects.filter(username=email).exists():
+                    messages.error(request, 'El email ya está registrado')
+                else:
+                    user = User.objects.create_user(username=email, email=email, password=password, first_name=nombre)
+                    user.save()
+                    user.groups.set([groups])
+                    MasCampos.objects.create(user=user, telefono=phone, carnet=carnet)
+                    messages.success(request, 'Usuario creado exitosamente')
+            return redirect('gestionarUsuario')
         else:
             messages.error(request, 'Las contraseñas no coinciden')
     
     grupos = Group.objects.exclude(id__in=[1, 2])  # Excluye grupos Cliente (1) y Administrador (2)
-    return render(request, 'Administrador/nuevoUsuario.html', {'grupos': grupos})
+    context = {
+        'grupos': grupos,
+        'user': user,
+        'mascampos': mascampos
+    }
+    return render(request, 'Administrador/nuevoUsuario.html', context)
 
 @login_required
 def gestionarUsuario(request):
@@ -93,6 +119,22 @@ def gestionarUsuario(request):
         'grupos': grupos
     }
     return render(request, 'Administrador/gestionarUsuario.html', context)
+
+@login_required
+def eliminarUsuario(request, id):
+    try:
+        if request.method == 'POST':
+            user = User.objects.get(id=id)
+            user.delete()
+            messages.success(request, 'Usuario eliminado exitosamente')
+        else:
+            messages.error(request, 'Método no permitido')
+    except User.DoesNotExist:
+        messages.error(request, 'Usuario no encontrado')
+    except Exception as e:
+        messages.error(request, f'Error al eliminar usuario: {str(e)}')
+    return redirect('gestionarUsuario')
+
 # create views repartidor
 # create views perfil de repartidor
 @login_required
@@ -105,6 +147,7 @@ def perfil(request):
         return redirect('repartidor')
 
     return render(request, 'Repartidor/perfil.html', {'user': request.user})
+
 # create views pedidos de repartidor
 @login_required
 def pedidos(request):
@@ -117,6 +160,7 @@ def pedidos(request):
 
     pedidos_asignados = Pedido.objects.filter(usuario=request.user)
     return render(request, 'Repartidor/pedido.html', {'pedidos': pedidos_asignados})
+    
 # create views detalle de pedido
 @login_required
 def detalle_pedido(request, id_pedido):
@@ -129,3 +173,4 @@ def detalle_pedido(request, id_pedido):
         return redirect('pedidos')
         
     return render(request, 'Repartidor/detalle_pedido.html', {'pedido': pedido})
+
