@@ -52,7 +52,8 @@ class Pedido(models.Model):
     ]
     
     id_pedido = models.AutoField(primary_key=True)
-    usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name="pedidos")
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name="pedidos", null=True, blank=True, default=None)
+    cliente_no_registrado = models.ForeignKey('ClienteNoRegistrado', on_delete=models.CASCADE, related_name="pedidos", null=True, blank=True, default=None)
     fecha = models.DateField()
     total = models.DecimalField(max_digits=10, decimal_places=2)
     subtotal = models.DecimalField(max_digits=10, decimal_places=2)
@@ -64,8 +65,16 @@ class Pedido(models.Model):
     total_puntos = models.IntegerField()
     estado = models.ForeignKey(Estado, on_delete=models.CASCADE, related_name="pedidos")
 
+    def clean(self):
+        from django.core.exceptions import ValidationError
+        if not self.usuario and not self.cliente_no_registrado:
+            raise ValidationError('Debe existir un usuario registrado o un cliente no registrado.')
+        if self.usuario and self.cliente_no_registrado:
+            raise ValidationError('No se puede asignar un usuario y un cliente no registrado al mismo tiempo.')
+
     def __str__(self):
-        return f"Pedido {self.id_pedido} de {self.usuario}"
+        return f"Pedido {self.id_pedido} de {self.usuario or self.cliente_no_registrado}"
+
 
 
 class LineaPedidos(models.Model):
@@ -103,3 +112,12 @@ class Reclamo(models.Model):
 
     def __str__(self):
         return f"Reclamo {self.id_reclamo} del Pedido {self.pedido.id_pedido}"
+
+class ClienteNoRegistrado(models.Model):
+    nombre = models.CharField(max_length=256)
+    telefono = models.CharField(max_length=15)
+    ubicacion = models.CharField(max_length=512)
+    correo = models.EmailField(max_length=256, blank=True, null=True)
+
+    def __str__(self):
+        return f"Cliente No Registrado: {self.nombre}"

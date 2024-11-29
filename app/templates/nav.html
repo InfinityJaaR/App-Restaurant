@@ -58,6 +58,19 @@
                 <i class="bi bi-journals"></i> Cátalogo
             </a></li>
             {% endif %}
+
+            {% if user.groups.all.0.name == 'Encargado de Despachos' %}
+            <li><a href="{% url 'gestion_pedidos' %}" class="nav-item">
+                <i class="fas fa-box"></i> Pedidos
+            </a></li>
+            {% endif %}
+
+            {% if user.groups.all.0.name == 'Registro de Pedidos' %}
+            <li><a href="{% url 'registro_pedidos_no_registrados' %}" class="nav-item">
+                <i class="fas fa-box"></i> Registro de pedidos
+            </a></li>
+            {% endif %}
+
             <li><a href="{% url 'logout' %}" class="nav-item">
                 <i class="fa-solid fa-arrow-right-from-bracket"></i> Cerrar Sesión
             </a></li>
