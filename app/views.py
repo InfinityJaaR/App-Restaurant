@@ -7,6 +7,7 @@ from .models import *
 from django.contrib import messages
 from django.contrib.auth import logout
 from django.core.paginator import Paginator
+from django.utils import timezone
 
 # Create your views here.
 @login_required
@@ -177,8 +178,42 @@ def detalle_pedido(request, id_pedido):
         
     return render(request, 'Repartidor/detalle_pedido.html', {'pedido': pedido})
 
+# create views gestion_pedidos
+@login_required
+def gestion_pedidos(request):
+    # Obtener los pedidos pendientes, en proceso y repartidores disponibles desde la base de datos
+    pedidos_pendientes = Pedido.objects.filter(estado__nombre="Pendiente")
+    pedidos_en_proceso = Pedido.objects.filter(estado__nombre="En Proceso")
+    repartidores_disponibles = User.objects.filter(groups__name='Repartidor', mascampos__is_active=True)
 
+    if request.method == 'POST':
+        pedido_id = request.POST.get('pedido_id')
+        accion = request.POST.get('accion')
+        pedido = Pedido.objects.get(id_pedido=pedido_id)
 
+        if accion == 'en_proceso':
+            pedido.estado = Estado.objects.get(nombre="En Proceso")
+            pedido.save()
+            messages.success(request, f'Pedido {pedido.id_pedido} está ahora en proceso.')
 
+        elif accion == 'listo_para_despacho':
+            repartidor = repartidores_disponibles.first()
+            if repartidor:
+                # Asignar pedido al repartidor
+                pedido.usuario = repartidor
+                pedido.estado = Estado.objects.get(nombre="En Camino")
+                pedido.fecha = timezone.now()
+                pedido.save()
+                messages.success(request, f'Pedido {pedido.id_pedido} asignado a {repartidor.first_name} {repartidor.last_name} y está en camino.')
+            else:
+                # No hay repartidores disponibles, pedido sigue pendiente
+                pedido.estado = Estado.objects.get(nombre="Pendiente")
+                pedido.save()
+                messages.warning(request, f'No hay repartidores disponibles para el pedido {pedido.id_pedido}. El pedido quedará pendiente.')
 
-
+    context = {
+        'pedidos_pendientes': pedidos_pendientes,
+        'pedidos_en_proceso': pedidos_en_proceso,
+        'repartidores': repartidores_disponibles
+    }
+    return render(request, 'EncargadoDeDespacho/gestion_pedidos.html', context)
