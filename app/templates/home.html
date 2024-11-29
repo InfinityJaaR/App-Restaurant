@@ -119,17 +119,12 @@
 
         {% if is_registros %}
         <div class="admin-dashboard">
-            <h2>Panel de Administración</h2>
+            <h2>Panel de Encargado de Registro de Pedidos</h2>
             <div class="dashboard-cards">
                 <div class="card">
                     <i class="bi bi-journals"></i>
-                    <h3>Registrar pedido</h3>
-                    <a href="#" class="card-button">Administrar</a>
-                </div>
-                <div class="card">
-                    <i class="fas fa-utensils"></i>
-                    <h3>Gestión de Menú</h3>
-                    <a href="#" class="card-button">Administrar</a>
+                    <h3>Registrar de pedidos</h3>
+                    <a href="{% url 'registro_pedidos_no_registrados' %}" class="card-button">Registrar</a>
                 </div>
             </div>
         </div>
