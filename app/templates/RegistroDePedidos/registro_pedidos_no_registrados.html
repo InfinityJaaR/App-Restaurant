@@ -1,0 +1,86 @@
+{% extends 'nav.html' %}
+{% load static %}
+
+{% block head %}
+    <title>Registro de Pedidos - Cliente No Registrado</title>
+    <link rel="stylesheet" href="{% static 'css/registro_pedidos.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="registro-container p-8">
+    <h1 class="text-3xl font-bold mb-6">Registro de Pedido de Cliente No Registrado</h1>
+    
+    <!-- Sección para ingresar los datos del cliente no registrado -->
+    <div class="cliente-info-section mb-10">
+        <h2 class="text-2xl font-semibold mb-4">Datos del Cliente</h2>
+        <form id="cliente-form">
+            <div class="mb-4">
+                <label for="nombre" class="block text-gray-700">Nombre Completo:</label>
+                <input type="text" id="nombre" name="nombre" class="w-full border rounded p-2" required>
+            </div>
+            <div class="mb-4">
+                <label for="telefono" class="block text-gray-700">Teléfono:</label>
+                <input type="text" id="telefono" name="telefono" class="w-full border rounded p-2" required>
+            </div>
+            <div class="mb-4">
+                <label for="ubicacion" class="block text-gray-700">Ubicación:</label>
+                <input type="text" id="ubicacion" name="ubicacion" class="w-full border rounded p-2" required>
+            </div>
+            <div class="mb-4">
+                <label for="correo" class="block text-gray-700">Correo Electrónico:</label>
+                <input type="email" id="correo" name="correo" class="w-full border rounded p-2">
+            </div>
+        </form>
+    </div>
+
+    <!-- Sección para seleccionar platillos -->
+    <div class="platillos-section mb-10">
+        <h2 class="text-2xl font-semibold mb-4">Seleccionar Platillos</h2>
+        <div class="platillos-list">
+            <!-- Lista de platillos cargada dinámicamente -->
+            <table class="platillos-table w-full table-auto border-collapse">
+                <thead>
+                    <tr class="bg-gray-200">
+                        <th class="border px-4 py-2">Nombre del Platillo</th>
+                        <th class="border px-4 py-2">Precio</th>
+                        <th class="border px-4 py-2">Cantidad</th>
+                        <th class="border px-4 py-2">Agregar</th>
+                    </tr>
+                </thead>
+                <tbody id="platillos-list" class="bg-white">
+                    <!-- Lista de platillos que se irá llenando dinámicamente -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Sección para mostrar el resumen del pedido -->
+    <div class="pedido-resumen-section mb-10">
+        <h2 class="text-2xl font-semibold mb-4">Resumen del Pedido</h2>
+        <table class="resumen-pedido-table w-full table-auto border-collapse">
+            <thead>
+                <tr class="bg-gray-200">
+                    <th class="border px-4 py-2">Platillo</th>
+                    <th class="border px-4 py-2">Cantidad</th>
+                    <th class="border px-4 py-2">Subtotal</th>
+                </tr>
+            </thead>
+            <tbody id="resumen-pedido-list" class="bg-white">
+                <!-- Lista de platillos seleccionados -->
+            </tbody>
+        </table>
+        <div class="total mt-4 text-xl font-bold">
+            Total: $<span id="pedido-total">0.00</span>
+        </div>
+    </div>
+
+    <!-- Botón para guardar el pedido -->
+    <div class="guardar-pedido-section">
+        <button id="guardar-pedido" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">Guardar Pedido</button>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+    <script src="{% static 'js/registro_pedidos.js' %}"></script>
+{% endblock %}

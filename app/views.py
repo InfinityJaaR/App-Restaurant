@@ -217,3 +217,72 @@ def gestion_pedidos(request):
         'repartidores': repartidores_disponibles
     }
     return render(request, 'EncargadoDeDespacho/gestion_pedidos.html', context)
+
+def registro_pedidos_no_registrados(request):
+    if request.method == 'POST':
+        try:
+            # Extraer los datos del cliente desde la solicitud POST
+            cliente_data = json.loads(request.body)
+            nombre = cliente_data.get('nombre')
+            telefono = cliente_data.get('telefono')
+            ubicacion = cliente_data.get('ubicacion')
+            correo = cliente_data.get('correo')
+            
+            # Crear un nuevo cliente no registrado
+            cliente_no_registrado = ClienteNoRegistrado.objects.create(
+                nombre=nombre,
+                telefono=telefono,
+                ubicacion=ubicacion,
+                correo=correo
+            )
+
+            # Extraer los datos del pedido
+            platillos_data = cliente_data.get('platillos', [])
+            total = 0
+            subtotal = 0
+
+            # Crear el pedido
+            pedido = Pedido.objects.create(
+                cliente_no_registrado=cliente_no_registrado,
+                fecha=timezone.now(),
+                total=0,  # El total se actualizará más adelante
+                subtotal=0,  # El subtotal se actualizará más adelante
+                tipo_pago='efectivo',
+                total_puntos=0,
+                estado=Estado.objects.get(nombre='Pendiente')
+            )
+
+            # Crear las líneas de pedido
+            for platillo_data in platillos_data:
+                platillo_id = platillo_data.get('id')
+                cantidad = platillo_data.get('cantidad', 1)
+                
+                platillo = Platillo.objects.get(id_platillo=platillo_id)
+                subtotal_orden = platillo.precio * cantidad
+                total += subtotal_orden
+                
+                LineaPedidos.objects.create(
+                    pedido=pedido,
+                    platillo=platillo,
+                    cantidad=cantidad,
+                    total_orden=subtotal_orden,
+                    valor_puntos=0  # No se consideran puntos para clientes no registrados
+                )
+
+            # Actualizar el total y el subtotal del pedido
+            pedido.total = total
+            pedido.subtotal = total
+            pedido.save()
+
+            return HttpResponse(status=201)
+        except ValidationError as e:
+            return HttpResponse(json.dumps({'error': str(e)}), status=400, content_type='application/json')
+        except Exception as e:
+            return HttpResponse(json.dumps({'error': 'Error al registrar el pedido.'}), status=500, content_type='application/json')
+
+    # Renderizar la plantilla de registro de pedidos
+    platillos = Platillo.objects.all()
+    context = {
+        'platillos': platillos
+    }
+    return render(request, 'RegistroDePedidos/registro_pedidos_no_registrados.html', context)
