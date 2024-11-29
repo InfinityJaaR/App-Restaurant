@@ -13,4 +13,5 @@ urlpatterns = [
     path('pedidos/', pedidos, name='pedidos'),
     path('pedidos/<int:id_pedido>/', detalle_pedido, name='detalle_pedido'),
     path('usuarios/eliminar/<int:id>/', eliminarUsuario, name='eliminarUsuario'),
+    path('gestion_pedidos/', gestion_pedidos, name='gestion_pedidos'),
 ]

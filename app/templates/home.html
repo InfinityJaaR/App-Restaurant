@@ -87,20 +87,16 @@
 
         {% if is_despachador %}
             <div class="admin-dashboard">
-                <h2>Panel de Administración</h2>
-                <div class="dashboard-cards">
-                    <div class="card">
-                        <i class="fas fa-users"></i>
-                        <h3>Gestión de Usuarios</h3>
-                        <a href="#" class="card-button">Administrar</a>
-                    </div>
-                    <div class="card">
-                        <i class="fas fa-utensils"></i>
-                        <h3>Gestión de Menú</h3>
-                        <a href="#" class="card-button">Administrar</a>
+                <div class="admin-dashboard">
+                    <h2>Panel del Encargado de Despacho</h2>
+                    <div class="dashboard-cards">
+                        <div class="card">
+                            <i class="fas fa-box"></i>
+                            <h3>Gestionar Pedidos</h3>
+                            <a href="{% url 'gestion_pedidos' %}" class="card-button">Ver Pedidos</a>
+                        </div>
                     </div>
                 </div>
-            </div>
         {% endif %}
 
         {% if is_menu %}
@@ -127,7 +123,7 @@
             <div class="dashboard-cards">
                 <div class="card">
                     <i class="bi bi-journals"></i>
-                    <h3>Gestión de Usuarios</h3>
+                    <h3>Registrar pedido</h3>
                     <a href="#" class="card-button">Administrar</a>
                 </div>
                 <div class="card">
