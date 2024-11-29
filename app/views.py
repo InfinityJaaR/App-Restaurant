@@ -177,6 +177,28 @@ def detalle_pedido(request, id_pedido):
         
     return render(request, 'Repartidor/detalle_pedido.html', {'pedido': pedido})
 
+@login_required
+def perfil_cliente(request):
+    user = request.user
+    mas_campos = MasCampos.objects.get(user=user)
+    
+    if request.method == 'POST':
+        user.first_name = request.POST.get('nombre')
+        user.email = request.POST.get('email')
+        mas_campos.direccion = request.POST.get('direccion')
+        mas_campos.telefono = request.POST.get('telefono')
+        
+        user.save()
+        mas_campos.save()
+        messages.success(request, 'Perfil actualizado exitosamente')
+        return redirect('perfil_cliente')
+        
+    context = {
+        'user': user,
+        'mas_campos': mas_campos
+    }
+    return render(request, 'Cliente/perfil.html', context)
+
 
 
 
