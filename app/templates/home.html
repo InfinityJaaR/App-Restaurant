@@ -69,17 +69,17 @@
         
         {% if is_repartidor %}
             <div class="admin-dashboard">
-                <h2>Panel de Administración</h2>
+                <h2>Panel de Repartidor</h2>
                 <div class="dashboard-cards">
                     <div class="card">
-                        <i class="fas fa-users"></i>
-                        <h3>Gestión de Usuarios</h3>
-                        <a href="#" class="card-button">Administrar</a>
+                        <i class="fa-regular fa-user"></i>
+                        <h3>Cambiar estado </h3>
+                        <a href="{% url 'repartidor' %}" class="card-button">Cambiar estados</a>
                     </div>
                     <div class="card">
-                        <i class="fas fa-utensils"></i>
-                        <h3>Gestión de Menú</h3>
-                        <a href="#" class="card-button">Administrar</a>
+                        <i class="fa-solid fa-truck"></i>
+                        <h3>Pedidos asignados</h3>
+                        <a href="{% url 'pedidos' %}" class="card-button">Pedidos asignados</a>
                     </div>
                 </div>
             </div>
