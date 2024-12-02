@@ -12,21 +12,21 @@
             <h2 class="mb-4">Perfil del Repartidor</h2>
             <form action="{% url 'repartidor' %}" method="POST">
                 {% csrf_token %}
-                <div class="mb-3">
+                <div class="mb-3 form-group">
                     <label class="form-label">Nombre:</label>
                     <input type="text" name="nombre" class="form-control" value="{{ user.first_name }}" readonly>
                 </div>
-                <div class="mb-3">
+                <div class="mb-3 form-group">
                     <label class="form-label">Carnet:</label>
                     <input type="text" name="carnet" class="form-control" value="{{ user.mascampos.carnet }}" readonly>
                 </div>
 
-                <div class="mb-3">
+                <div class="mb-3 form-group">
                     <label class="form-label">Email:</label>
                     <input type="email" name="email" class="form-control" value="{{ user.email }}" readonly>
                 </div>
 
-                <div class="mb-3">
+                <div class="mb-3 form-group">
                     <label class="form-label">Teléfono:</label>
                     <input type="tel" name="telefono" class="form-control" value="{{ user.mascampos.telefono }}" readonly>
                 </div>

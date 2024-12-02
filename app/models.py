@@ -54,6 +54,7 @@ class Pedido(models.Model):
     id_pedido = models.AutoField(primary_key=True)
     usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name="pedidos", null=True, blank=True, default=None)
     cliente_no_registrado = models.ForeignKey('ClienteNoRegistrado', on_delete=models.CASCADE, related_name="pedidos", null=True, blank=True, default=None)
+    repartidor =  models.ForeignKey(User, related_name='pedidos_repartidos', on_delete=models.SET_NULL, null=True, blank=True)
     fecha = models.DateField()
     total = models.DecimalField(max_digits=10, decimal_places=2)
     subtotal = models.DecimalField(max_digits=10, decimal_places=2)
