@@ -110,3 +110,8 @@
 .page-arrow:hover {
     background-color: #e9ecef;
 }
+
+.form-group input[readonly] {
+    background-color: #f8f9fa;
+    cursor: not-allowed;
+}

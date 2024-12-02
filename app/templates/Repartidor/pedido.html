@@ -25,7 +25,7 @@
                     </thead>
                     <tbody>
                         {% for pedido in pedidos %}
-                        {% if pedido.estado.id_estado == 2 %}
+                        {% if pedido.estado.id_estado == 5 %}
                         <tr>
                             <td>#{{ pedido.id_pedido }}</td>
                             <td>{{ pedido.fecha }}</td>
@@ -59,7 +59,7 @@
                     </thead>
                     <tbody id="pedidos-entregados-body">
                         {% for pedido in pedidos_entregados %}
-                        {% if pedido.estado.id_estado == 3 %}
+                        {% if pedido.estado.id_estado == 6 %}
                         <tr>
                             <td>#{{ pedido.id_pedido }}</td>
                             <td>{{ pedido.fecha }}</td>
