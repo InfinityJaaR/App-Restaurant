@@ -24,6 +24,7 @@
             </div>
 
             <div class="row mb-3">
+                {% if pedido.usuario %}
                 <div class="col-md-6">
                     <label class="form-label">Cliente:</label>
                     <input type="text" class="form-control" value="{{ pedido.usuario.first_name }}" readonly>
@@ -32,12 +33,26 @@
                     <label class="form-label">Teléfono:</label>
                     <input type="text" class="form-control" value="{{ pedido.usuario.mascampos.telefono }}" readonly>
                 </div>
+                {% elif pedido.cliente_no_registrado %}
+                <div class="col-md-6">
+                    <label class="form-label">Cliente:</label>
+                    <input type="text" class="form-control" value="{{ pedido.cliente_no_registrado.nombre }}" readonly>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Teléfono:</label>
+                    <input type="text" class="form-control" value="{{ pedido.cliente_no_registrado.telefono }}" readonly>
+                </div>
+                {% endif %}
             </div>
 
             <div class="row mb-3">
                 <div class="col-md-6">
                     <label class="form-label">Dirección:</label>
+                    {% if pedido.usuario %}
                     <input type="text" class="form-control" value="{{ pedido.usuario.mascampos.direccion }}" readonly>
+                    {% else %}
+                    <input type="text" class="form-control" value="{{ pedido.cliente_no_registrado.ubicacion }}" readonly>
+                    {% endif %}
                 </div>
                 <div class="col-md-6">
                     <label class="form-label">Forma de Pago:</label>

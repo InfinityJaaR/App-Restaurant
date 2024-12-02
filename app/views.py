@@ -161,8 +161,8 @@ def pedidos(request):
         messages.success(request, 'Pedido entregado correctamente')
         return redirect('pedidos')
 
-    pedidos_asignados = Pedido.objects.filter(usuario=request.user)
-    pedidos_entregados = pedidos_asignados.filter(estado__id_estado=3)
+    pedidos_asignados = Pedido.objects.filter(repartidor=request.user)
+    pedidos_entregados = pedidos_asignados.filter(estado__id_estado=3)# estado 3 = Entregados
     
     return render(request, 'Repartidor/pedido.html', {'pedidos': pedidos_asignados, 'pedidos_entregados': pedidos_entregados})
     
