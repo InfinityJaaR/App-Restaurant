@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', function () {
         enlaceAnterior.classList.add('page-link', 'page-arrow');
         enlaceAnterior.addEventListener('click', function (e) {
             e.preventDefault();
-            const paginaActiva = document.querySelector('.page-link.active');
+            const paginaActiva = document.querySelector('.page-numbers-container .page-link.active');
             const paginaActual = parseInt(paginaActiva.textContent);
             if (paginaActual > 1) {
                 mostrarPagina(paginaActual - 1);
@@ -33,6 +33,8 @@ document.addEventListener('DOMContentLoaded', function () {
         contenedorPaginacion.appendChild(enlaceAnterior);
 
         // Botones de número de página
+        const pageNumbersContainer = document.createElement('div');
+        pageNumbersContainer.classList.add('page-numbers-container');
         for (let i = 1; i <= totalPaginas; i++) {
             const enlacePagina = document.createElement('a');
             enlacePagina.href = '#';
@@ -43,8 +45,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 mostrarPagina(i);
                 actualizarPaginaActiva(i);
             });
-            contenedorPaginacion.appendChild(enlacePagina);
+            pageNumbersContainer.appendChild(enlacePagina);
         }
+        contenedorPaginacion.appendChild(pageNumbersContainer);
 
         // Botón de página siguiente
         const enlaceSiguiente = document.createElement('a');
@@ -53,7 +56,7 @@ document.addEventListener('DOMContentLoaded', function () {
         enlaceSiguiente.classList.add('page-link', 'page-arrow');
         enlaceSiguiente.addEventListener('click', function (e) {
             e.preventDefault();
-            const paginaActiva = document.querySelector('.page-link.active');
+            const paginaActiva = document.querySelector('.page-numbers-container .page-link.active');
             const paginaActual = parseInt(paginaActiva.textContent);
             if (paginaActual < totalPaginas) {
                 mostrarPagina(paginaActual + 1);
@@ -67,13 +70,16 @@ document.addEventListener('DOMContentLoaded', function () {
             enlacePagina.href = '#';
             enlacePagina.textContent = 1;
             enlacePagina.classList.add('page-link', 'active');
-            contenedorPaginacion.appendChild(enlacePagina);
+            pageNumbersContainer.appendChild(enlacePagina);
         }
+
+        // Asegurar que los botones de paginación estén centrados
+        contenedorPaginacion.style.justifyContent = 'center';
     }
 
     function actualizarPaginaActiva(paginaActiva) {
-        const enlacesPagina = contenedorPaginacion.getElementsByClassName('page-link');
-        Array.from(enlacesPagina).forEach(enlace => {
+        const enlacesPagina = document.querySelectorAll('.page-numbers-container .page-link');
+        enlacesPagina.forEach(enlace => {
             enlace.classList.remove('active', 'btn-primary');
             enlace.classList.add('btn-secondary');
             if (parseInt(enlace.textContent) === paginaActiva) {
@@ -82,12 +88,8 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     }
-
-    if (filas.length > 0) {
         mostrarPagina(1);
         crearControlesPaginacion();
         actualizarPaginaActiva(1);
-    } else {
-        crearControlesPaginacion();
-    }
+   
 });

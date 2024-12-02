@@ -156,13 +156,13 @@ def perfil(request):
 def pedidos(request):
     if request.method == 'POST':
         pedido = Pedido.objects.get(id_pedido=request.POST.get('id_pedido'))
-        pedido.estado = Estado.objects.get(id_estado=3)  # Cambiado a 3 para marcar como entregado
+        pedido.estado = Estado.objects.get(id_estado=6)  # Cambiado a 3 para marcar como entregado
         pedido.save()
         messages.success(request, 'Pedido entregado correctamente')
         return redirect('pedidos')
 
     pedidos_asignados = Pedido.objects.filter(repartidor=request.user)
-    pedidos_entregados = pedidos_asignados.filter(estado__id_estado=3)# estado 3 = Entregados
+    pedidos_entregados = pedidos_asignados.filter(estado__id_estado=6)# estado 3 = Entregados
     
     return render(request, 'Repartidor/pedido.html', {'pedidos': pedidos_asignados, 'pedidos_entregados': pedidos_entregados})
     
@@ -172,7 +172,7 @@ def detalle_pedido(request, id_pedido):
     pedido = Pedido.objects.get(id_pedido=id_pedido)
     
     if request.method == 'POST':
-        pedido.estado = Estado.objects.get(id_estado=3)  # 3 = Entregado
+        pedido.estado = Estado.objects.get(id_estado=6)  # 3 = Entregado
         pedido.save()
         messages.success(request, 'Pedido entregado correctamente')
         return redirect('pedidos')
