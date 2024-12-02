@@ -62,7 +62,7 @@
                         <td>{{ usuario.groups.first.name }}</td>
                         <td class="actions">
                             <a href="{% url 'editarUsuario' usuario.id %}" class="btn-action edit" title="Editar">
-                                <i class="fas fa-edit"></i>
+                                <i class="fa-solid fa-user-pen"></i>
                             </a>
                             <form method="POST" action="{% url 'eliminarUsuario' usuario.id %}" style="display: inline;" class="delete-form">
                                 {% csrf_token %}

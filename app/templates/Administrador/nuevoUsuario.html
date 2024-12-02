@@ -62,7 +62,7 @@
     <div class="form-container">
         <div class="form-header">
             <h2>Administrar Usuario</h2>
-            <p class="form-subtitle">Complete los datos del nuevo usuario</p>
+            <p class="form-subtitle">Complete los datos del usuario</p>
         </div>
         {% if messages %}
         <div class="messages">
@@ -145,8 +145,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Configuración de la máscara para teléfono
     var phoneMask = IMask(document.getElementById('phone'), {
         mask: '0000-0000',
-        lazy: false,
-        placeholderChar: '_'
+        lazy: true,
     });
 
     // Validación del formulario

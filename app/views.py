@@ -52,6 +52,7 @@ def registro(request):
                 user.save()
                 user.groups.set([1])
                 MasCampos.objects.create(user=user, telefono=phone, direccion=address)
+                Puntos.objects.create(user=user)
                 messages.success(request, 'Registro exitoso. Ahora puedes iniciar sesión.')
                 return redirect('login')
         else:

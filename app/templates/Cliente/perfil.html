@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block head %}
-    <title>Mi Perfil - Queiques</title>
+    <title>Perfil</title>
     <link rel="stylesheet" href="{% static 'css/perfil.css' %}">
 {% endblock %}
 
@@ -10,46 +10,85 @@
 <div class="profile-container">
     <div class="profile-card">
         <div class="profile-header">
-            <h1>Mi Perfil</h1>
-            <div class="profile-avatar">
-                <i class="fas fa-user"></i>
-            </div>
-        </div>
-
-        {% if messages %}
+            {% if messages %}
             {% for message in messages %}
                 <div class="alert alert-{{ message.tags }}">
                     {{ message }}
                 </div>
             {% endfor %}
         {% endif %}
+            <div class="profile-banner"></div>
+            <div class="profile-avatar-wrapper">
+                <div class="profile-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <h1>{{ user.first_name }}</h1>
+            </div>
+        </div>
 
-        <form method="POST" class="profile-form">
-            {% csrf_token %}
-            <div class="form-group">
-                <label for="nombre">Nombre</label>
-                <input type="text" id="nombre" name="nombre" value="{{ user.first_name }}" required>
+        <div class="profile-sections">
+            <!-- Sección de puntos con nuevo diseño -->
+            <div class="points-section">
+                <div class="points-card">
+                    <div class="points-header">
+                        <i class="fas fa-crown"></i>
+                        <h2>Mis Puntos</h2>
+                    </div>
+                    <div class="points-info">
+                        <div class="points-value">
+                            <i class="fas fa-star"></i>
+                            <span>{{ user.puntos.puntos_acumulados }}</span>
+                            <small>puntos</small>
+                        </div>
+                        {% if user.puntos.fecha_caducidad %}
+                            <div class="points-expiry">
+                                <i class="fas fa-clock"></i>
+                                <span>Vence el: {{ user.puntos.fecha_caducidad|date:"d/m/Y" }}</span>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
             </div>
 
-            <div class="form-group">
-                <label for="email">Correo Electrónico</label>
-                <input type="email" id="email" name="email" value="{{ user.email }}" required>
-            </div>
+            <!-- Información personal -->
+            <div class="personal-info-section">
+                <h2><i class="fas fa-user-edit"></i> Información Personal</h2>
+                <form method="POST" class="profile-form" id="profileForm">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="nombre">Nombre</label>
+                        <input type="text" id="nombre" name="nombre" value="{{ user.first_name }}" required readonly>
+                    </div>
 
-            <div class="form-group">
-                <label for="telefono">Teléfono</label>
-                <input type="tel" id="telefono" name="telefono" value="{{ mas_campos.telefono }}" required>
-            </div>
+                    <div class="form-group">
+                        <label for="email">Correo Electrónico</label>
+                        <input type="email" id="email" name="email" value="{{ user.email }}" required readonly>
+                    </div>
 
-            <div class="form-group">
-                <label for="direccion">Dirección</label>
-                <input type="text" id="direccion" name="direccion" value="{{ mas_campos.direccion }}" required>
-            </div>
+                    <div class="form-group">
+                        <label for="telefono">Teléfono</label>
+                        <input type="tel" id="telefono" name="telefono" value="{{ mas_campos.telefono }}" required readonly>
+                    </div>
 
-            <div class="form-actions">
-                <button type="submit" class="btn-save">Guardar Cambios</button>
+                    <div class="form-group">
+                        <label for="direccion">Dirección</label>
+                        <input type="text" id="direccion" name="direccion" value="{{ mas_campos.direccion }}" required readonly>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" id="btnEdit" class="btn-edit">Editar Información</button>
+                        <div class="update-actions" style="display: none;">
+                            <button type="submit" class="btn-update">Actualizar</button>
+                            <button type="button" class="btn-cancel">Cancelar</button>
+                        </div>
+                    </div>
+                </form>
             </div>
-        </form>
+        </div>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'js/perfil.js' %}"></script>
 {% endblock %}

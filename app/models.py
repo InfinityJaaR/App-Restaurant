@@ -15,7 +15,7 @@ class MasCampos(models.Model):
 class Puntos(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="puntos")
     puntos_acumulados = models.IntegerField(default=0)
-    fecha_caducidad = models.DateField()
+    fecha_caducidad = models.DateField(null=True, blank=True)
     disponibilidad = models.BooleanField(default=True)
 
     def __str__(self):
