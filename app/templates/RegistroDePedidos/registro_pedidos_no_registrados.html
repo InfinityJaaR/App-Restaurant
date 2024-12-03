@@ -2,85 +2,117 @@
 {% load static %}
 
 {% block head %}
-    <title>Registro de Pedidos - Cliente No Registrado</title>
-    <link rel="stylesheet" href="{% static 'css/registro_pedidos.css' %}">
+  <title>Registro de Pedidos - Cliente No Registrado</title>
 {% endblock %}
 
 {% block content %}
-<div class="registro-container p-8">
-    <h1 class="text-3xl font-bold mb-6">Registro de Pedido de Cliente No Registrado</h1>
-    
-    <!-- Sección para ingresar los datos del cliente no registrado -->
-    <div class="cliente-info-section mb-10">
+  <div class="flex justify-center items-center min-h-screen bg-gray-100">
+    <div class="w-full max-w-4xl bg-white shadow-md rounded-lg p-8">
+      <h1 class="text-3xl font-bold text-center mb-6">Registro de Pedido de Cliente No Registrado</h1>
+
+       <!-- Div para mensajes del servidor -->
+       {% if messages %}
+       <div id="server-messages" class="mb-6">
+         {% for message in messages %}
+           <div class="bg-{{ message.tags }}-500 text-white font-bold p-4 rounded mb-4">
+             {{ message }}
+           </div>
+         {% endfor %}
+       </div>
+     {% endif %}
+
+     <!-- Div para mensajes de JS -->
+     <div id="js-messages" class="mb-6"></div>
+
+      <!-- Formulario de datos del cliente -->
+      <div class="mb-10">
         <h2 class="text-2xl font-semibold mb-4">Datos del Cliente</h2>
-        <form id="cliente-form">
-            <div class="mb-4">
-                <label for="nombre" class="block text-gray-700">Nombre Completo:</label>
-                <input type="text" id="nombre" name="nombre" class="w-full border rounded p-2" required>
-            </div>
-            <div class="mb-4">
-                <label for="telefono" class="block text-gray-700">Teléfono:</label>
-                <input type="text" id="telefono" name="telefono" class="w-full border rounded p-2" required>
-            </div>
-            <div class="mb-4">
-                <label for="ubicacion" class="block text-gray-700">Ubicación:</label>
-                <input type="text" id="ubicacion" name="ubicacion" class="w-full border rounded p-2" required>
-            </div>
-            <div class="mb-4">
-                <label for="correo" class="block text-gray-700">Correo Electrónico:</label>
-                <input type="email" id="correo" name="correo" class="w-full border rounded p-2">
-            </div>
+        <form id="cliente-form" class="space-y-4">
+          <div>
+            <label for="nombre" class="block text-gray-700 font-medium">Nombre Completo:</label>
+            <input type="text" id="nombre" name="nombre" class="w-full border rounded p-2" required />
+          </div>
+          <div>
+            <label for="telefono" class="block text-gray-700 font-medium">Teléfono:</label>
+            <input type="text" id="telefono" name="telefono" class="w-full border rounded p-2" required />
+          </div>
+          <div>
+            <label for="ubicacion" class="block text-gray-700 font-medium">Ubicación:</label>
+            <input type="text" id="ubicacion" name="ubicacion" class="w-full border rounded p-2" required />
+          </div>
+          <div>
+            <label for="correo" class="block text-gray-700 font-medium">Correo Electrónico:</label>
+            <input type="email" id="correo" name="correo" class="w-full border rounded p-2" />
+          </div>
+          <div>
+            <label for="tipo_pago" class="block text-gray-700 font-medium">Método de Pago:</label>
+            <select id="tipo_pago" name="tipo_pago" class="w-full border rounded p-2" required>
+              <option value="efectivo">Efectivo</option>
+              <option value="tarjeta">Tarjeta</option>
+            </select>
+          </div>
         </form>
-    </div>
+      </div>
 
-    <!-- Sección para seleccionar platillos -->
-    <div class="platillos-section mb-10">
+      <!-- Selección de platillos -->
+      <div class="mb-10">
         <h2 class="text-2xl font-semibold mb-4">Seleccionar Platillos</h2>
-        <div class="platillos-list">
-            <!-- Lista de platillos cargada dinámicamente -->
-            <table class="platillos-table w-full table-auto border-collapse">
-                <thead>
-                    <tr class="bg-gray-200">
-                        <th class="border px-4 py-2">Nombre del Platillo</th>
-                        <th class="border px-4 py-2">Precio</th>
-                        <th class="border px-4 py-2">Cantidad</th>
-                        <th class="border px-4 py-2">Agregar</th>
-                    </tr>
-                </thead>
-                <tbody id="platillos-list" class="bg-white">
-                    <!-- Lista de platillos que se irá llenando dinámicamente -->
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- Sección para mostrar el resumen del pedido -->
-    <div class="pedido-resumen-section mb-10">
-        <h2 class="text-2xl font-semibold mb-4">Resumen del Pedido</h2>
-        <table class="resumen-pedido-table w-full table-auto border-collapse">
-            <thead>
-                <tr class="bg-gray-200">
-                    <th class="border px-4 py-2">Platillo</th>
-                    <th class="border px-4 py-2">Cantidad</th>
-                    <th class="border px-4 py-2">Subtotal</th>
-                </tr>
-            </thead>
-            <tbody id="resumen-pedido-list" class="bg-white">
-                <!-- Lista de platillos seleccionados -->
-            </tbody>
+        <table class="w-full table-auto border-collapse">
+          <thead>
+            <tr class="bg-gray-200 text-gray-700">
+              <th class="border px-4 py-2">Nombre del Platillo</th>
+              <th class="border px-4 py-2">Precio</th>
+              <th class="border px-4 py-2">Cantidad Disponible</th>
+              <th class="border px-4 py-2">Cantidad</th>
+              <th class="border px-4 py-2">Agregar</th>
+            </tr>
+          </thead>
+          <tbody id="platillos-list" class="bg-white">
+            {% for platillo in platillos %}
+              <tr class="border-b" id="platillo-row-{{ platillo.id_platillo }}">
+                <td class="border px-4 py-2">{{ platillo.nombre }}</td>
+                <td class="border px-4 py-2">${{ platillo.precio }}</td>
+                <td class="border px-4 py-2" id="disponible-{{ platillo.id_platillo }}">{{ platillo.cantidad_maxima }}</td>
+                <td class="border px-4 py-2">
+                  <input type="number" id="cantidad-{{ platillo.id_platillo }}" class="w-full border rounded p-2" min="1" max="{{ platillo.cantidad_maxima }}" value="1" />
+                </td>
+                <td class="border px-4 py-2">
+                  <button type="button" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onclick="agregarPlatillo({{ platillo.id_platillo }})">Agregar</button>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
         </table>
-        <div class="total mt-4 text-xl font-bold">
-            Total: $<span id="pedido-total">0.00</span>
-        </div>
-    </div>
+      </div>
 
-    <!-- Botón para guardar el pedido -->
-    <div class="guardar-pedido-section">
-        <button id="guardar-pedido" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">Guardar Pedido</button>
+      <!-- Resumen del pedido -->
+      <div class="mb-10">
+        <h2 class="text-2xl font-semibold mb-4">Resumen del Pedido</h2>
+        <table class="w-full table-auto border-collapse">
+          <thead>
+            <tr class="bg-gray-200 text-gray-700">
+              <th class="border px-4 py-2">Platillo</th>
+              <th class="border px-4 py-2">Cantidad</th>
+              <th class="border px-4 py-2">Subtotal</th>
+              <th class="border px-4 py-2">Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="resumen-pedido-list" class="bg-white"></tbody>
+        </table>
+        <div class="text-right mt-4 text-xl font-bold">
+          Total: $<span id="pedido-total">0.00</span>
+        </div>
+      </div>
+
+      <!-- Botón para guardar el pedido -->
+      <div class="flex justify-end">
+        <button id="guardar-pedido" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-6 rounded">Guardar Pedido</button>
+      </div>
     </div>
-</div>
+  </div>
 {% endblock %}
 
 {% block scripts %}
-    <script src="{% static 'js/registro_pedidos.js' %}"></script>
+  <script src="{% static 'js/registro_pedidos.js' %}"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 {% endblock %}
