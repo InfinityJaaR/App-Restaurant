@@ -1,0 +1,87 @@
+.page-container {
+    padding: 2rem;
+    min-height: 100vh;
+    background-color: #f8f9fa;
+    font-family: 'Poppins', sans-serif;
+}
+
+.content-wrapper {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.header h1 {
+    color: #2c3e50;
+    font-size: 1.8rem;
+    font-weight: 600;
+}
+
+.titulo h1 {
+    color: #2c3e50;
+    font-size: 1.8rem;
+    font-weight: 600;
+}
+
+.catalogo {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.row {
+    display: flex;
+    width: 100%;
+}
+
+.col-4 {
+    flex: 1 1 33%;
+    padding: 10px;
+}
+
+.card {
+    border: 1px solid #ccc;
+    border-radius: 10px; /* Redondea los bordes */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Añade una sombra */
+    overflow: hidden;
+    text-align: center;
+    transition: box-shadow 0.3s ease; /* Añade una transición suave para la sombra */
+}
+
+.card:hover {
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Aumenta la sombra al pasar el ratón por encima */
+}
+
+.card img {
+    width: 100%;
+    height: auto;
+    border-top-left-radius: 10px; /* Redondea las esquinas superiores de la imagen */
+    border-top-right-radius: 10px; /* Redondea las esquinas superiores de la imagen */
+}
+
+.card-body {
+    padding: 15px;
+}
+
+.btn-edit, .btn-delete {
+    margin: 5px;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.btn-edit {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.btn-delete {
+    background-color: #f44336;
+    color: white;
+}
