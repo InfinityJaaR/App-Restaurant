@@ -1,0 +1,92 @@
+{% extends 'nav.html' %}
+{% load static %}
+
+{% block head %}
+    <title>Registro de Pedido - Queiques</title>
+    <link rel="stylesheet" href="{% static 'css/perfil.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto p-6">
+    
+    {% if messages %}    
+        <div class="max-w-4xl mx-auto p-6">
+            {% for message in messages %}
+                <div class="p-4 rounded-lg 
+                    {% if message.tags == 'success' %}bg-green-500 text-white border border-green-700{% endif %}
+                    {% if message.tags == 'error' %}bg-red-500 text-white border border-red-700{% endif %}
+                    {% if message.tags == 'warning' %}bg-yellow-500 text-white border border-yellow-700{% endif %}
+                    {% if message.tags == 'info' %}bg-blue-500 text-white border border-blue-700{% endif %}
+                    ">
+                    <div class="flex items-center">
+                        <i class="fas fa-check-circle mr-2" 
+                        {% if message.tags == 'error' %}class="fas fa-exclamation-circle mr-2"{% endif %}
+                        {% if message.tags == 'warning' %}class="fas fa-exclamation-triangle mr-2"{% endif %}
+                        {% if message.tags == 'info' %}class="fas fa-info-circle mr-2"{% endif %}></i>
+                        <p>{{ message }}</p>
+                    </div>
+                </div>
+            {% endfor %}        
+        </div>
+    {% endif %}
+    {% if form_render != False %}    
+    <form action="{% url 'registro_pedido_cliente'%}" method="POST"  class="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-md">
+        <div class="max-w-4xl mx-auto mb-4">
+            <div class="flex space-x-4 mt-4">    
+                <a href="{% url 'consultar_menu' %}" class="bg-black text-white px-4 py-2 rounded"> <i class="fa-solid fa-arrow-left mr-4"></i> Seguir consultando mas platillos</a>        
+            </div>
+        </div>
+        {% csrf_token %}
+        <h2 class="text-2xl font-semibold mb-4">Datos del Usuario</h2>
+        <div class="mb-5 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 gap-6">
+            <p><strong>Nombre:</strong> {{ usuario.nombre }}</p>
+            <p><strong>Correo:</strong> {{ usuario.correo }}</p>
+            <p><strong>Teléfono:</strong> {{ usuario.telefono }}</p>
+            <p><strong>Ubicación:</strong> {{ usuario.direccion }}</p>
+        </div>
+        <h2 class="text-2xl font-semibold mb-4">Detalles del Pedido</h2>
+        
+        <div class=" mb-5 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+            <div class="font-semibold text-left">Platillo</div>
+            <div class="font-semibold text-left">Cantidad</div>
+            <div class="font-semibold text-left">Precio unitario</div>
+            <div class="font-semibold text-left">Total</div>
+        
+            {% for item in carrito_items %}
+                <div>{{ item.platillo.nombre }}</div>
+                <div>{{ item.cantidad }}</div>
+                <div>{{ item.platillo.precio | floatformat:2 }}</div>
+                <div>{{ item.total | floatformat:2 }}</div>
+            {% endfor %}
+        </div>
+                        
+        <div class="mb-6">
+            <label for="tipo_pago" class="block text-xl font-medium" >Método de Pago:</label>
+            <select name="tipo_pago" required="true" id="tipo_pago" class="mt-4 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 text-gray-700">
+                <option value="no_pago">Seleccione su metodo de pago</option>
+                <option value="efectivo">Efectivo</option>
+                <option value="tarjeta">Tarjeta</option>
+                <option value="puntos">Puntos</option>
+            </select>
+        </div>
+                       
+        <div class="mb-5">
+            <label for="codigo_cupon" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Código del cupón</label>
+            <input type="text" id="codigo_cupon" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+        </div>
+
+        <div class="mb-12">
+            <h3 class="text-xl font-medium">Total :<span class="font-bold text-lg"> ${{ total | floatformat:2 }}</span></h3>
+            <h3 class="text-xl font-medium">Total en Puntos :<span class="font-bold text-lg"> {{ total_puntos }}</span></h3>
+        </div>
+        {% if render_button %}    
+        <button type="submit" class="w-full py-2 px-4 bg-black text-white font-semibold rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+            <i class="fa-solid fa-check mr-2"></i> Confirmar Pedido
+        </button>
+        {% endif %}
+    </form>            
+    {% endif %}
+    
+</div>
+
+{% endblock %}

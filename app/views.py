@@ -8,6 +8,11 @@ from django.contrib import messages
 from django.contrib.auth import logout
 from django.core.paginator import Paginator
 from django.utils import timezone
+from datetime import timedelta
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
+from django.core.exceptions import ValidationError
+
 
 # Create your views here.
 @login_required
@@ -185,6 +190,7 @@ def perfil_cliente(request):
     
     if request.method == 'POST':
         user.first_name = request.POST.get('nombre')
+        user.last_name = request.POST.get('apellido')
         user.email = request.POST.get('email')
         mas_campos.direccion = request.POST.get('direccion')
         mas_campos.telefono = request.POST.get('telefono')
@@ -199,6 +205,7 @@ def perfil_cliente(request):
         'mas_campos': mas_campos
     }
     return render(request, 'Cliente/perfil.html', context)
+
 
 # create views gestion_pedidos
 @login_required
@@ -308,3 +315,358 @@ def registro_pedidos_no_registrados(request):
         'platillos': platillos
     }
     return render(request, 'RegistroDePedidos/registro_pedidos_no_registrados.html', context)
+
+
+def registro_pedidos_no_registrados(request):
+    if request.method == 'POST':
+        try:
+            cliente_data = json.loads(request.body)
+            nombre = cliente_data.get('nombre')
+            telefono = cliente_data.get('telefono')
+            ubicacion = cliente_data.get('ubicacion')
+            correo = cliente_data.get('correo')
+
+            cliente_no_registrado = ClienteNoRegistrado.objects.create(
+                nombre=nombre,
+                telefono=telefono,
+                ubicacion=ubicacion,
+                correo=correo
+            )
+
+            platillos_data = cliente_data.get('platillos', [])
+            total = 0
+            total_puntos = 0
+
+            pedido = Pedido.objects.create(
+                cliente_no_registrado=cliente_no_registrado,
+                fecha=timezone.now(),
+                total=0,
+                subtotal=0,
+                tipo_pago='efectivo',  # Cambia a 'puntos' según sea necesario
+                total_puntos=0,
+                estado=Estado.objects.get(nombre='Pendiente')
+            )
+
+            for platillo_data in platillos_data:
+                platillo_id = platillo_data.get('id')
+                cantidad = platillo_data.get('cantidad', 1)
+
+                platillo = Platillo.objects.get(id_platillo=platillo_id)
+                subtotal_orden = platillo.precio * cantidad
+                puntos_orden = platillo.precio_puntos * cantidad
+
+                total += subtotal_orden
+                total_puntos += puntos_orden
+
+                LineaPedidos.objects.create(
+                    pedido=pedido,
+                    platillo=platillo,
+                    cantidad=cantidad,
+                    total_orden=subtotal_orden,
+                    valor_puntos=puntos_orden
+                )
+
+            if cliente_data.get('usar_puntos', False):
+                # Si el cliente paga con puntos, ajusta los valores
+                pedido.total_puntos = total_puntos
+                pedido.total = 0  # Total en efectivo será 0
+            else:
+                pedido.total = total
+
+            pedido.subtotal = total
+            pedido.save()
+
+            return JsonResponse({'message': 'Pedido registrado con éxito.'}, status=201)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+
+    platillos = Platillo.objects.all()
+    context = {'platillos': platillos}
+    return render(request, 'RegistroDePedidos/registro_pedidos_no_registrados.html', context)
+
+#Cliente
+def consultar_menu(request):
+    platillos = Platillo.objects.all()
+    platillos_dia = Platillo.objects.filter(platillo_dia=True)
+    print(platillos_dia)
+    context = {
+        'platillos': platillos,
+        'platillos_dia': list(platillos_dia)
+    }
+    return render(request, 'Cliente/consultar_menu.html', context)
+
+def obtener_carrito(request):
+    """Obtiene el carrito del usuario si está autenticado o crea uno temporal para no autenticados."""
+    carrito = None  # Inicializamos la variable carrito antes de entrar al bloque condicional.
+    
+    if request.user.is_authenticated:
+        # Si el usuario está autenticado, obtenemos o creamos un carrito con su usuario
+           carrito, created = Carrito.objects.get_or_create(usuario=request.user)
+
+    else:
+        # Si el usuario no está autenticado, usamos la session_key
+        session_key = request.session.session_key
+        if not session_key:
+            # Si no existe un session_key, lo creamos
+            request.session.create()
+            session_key = request.session.session_key
+        
+        # Creamos un carrito con session_id
+        carrito, created = Carrito.objects.get_or_create(session_id=session_key, usuario=None)
+    return carrito
+
+
+def agregar_carrito(request, platillo_id):
+    """Agregar un platillo al carrito con su cantidad y actualizar el total"""
+    carrito = obtener_carrito(request)
+    platillo = get_object_or_404(Platillo, id_platillo=platillo_id)
+    cantidad = int(request.POST.get('cantidad', 1))
+    
+    # Verificar si el platillo ya está en el carrito
+    item, created = ItemCarrito.objects.get_or_create(
+        carrito=carrito,
+        platillo=platillo,
+        defaults={'cantidad': 0, 'precio_unitario': platillo.precio, 'total': 0}
+    )
+
+    # Actualizar la cantidad y el total del platillo
+    item.cantidad += cantidad
+    item.actualizar_total()
+
+    return redirect('ver_carrito')
+
+def ver_carrito(request):
+    """Mostrar los items en el carrito del usuario"""
+    carrito = obtener_carrito(request)
+    items = carrito.items.all()
+
+    # Imprimir el id del platillo de cada item en el carrito
+    for item in items:
+        print(f"Platillo: {item.platillo.nombre}, ID del platillo: {item.platillo.id_platillo}")
+
+    # Calcular el total del carrito
+    total = sum(item.total for item in items)
+
+    # Pasar los items y el total a la plantilla
+    return render(request, 'Cliente/mostrar_carrito.html', {
+        'carrito_items': items, 
+        'total_carrito': total
+    })
+
+
+@login_required
+def realizar_pedido(request):
+    carrito = obtener_carrito(request)
+    items = carrito.items.all()
+
+    if not items:
+        return redirect('ver_carrito')  # Si el carrito está vacío, redirige al carrito
+
+    # Crear el pedido
+    pedido = Pedido.objects.create(
+        usuario=request.user,
+        fecha=timezone.now(),
+        total=0,
+        subtotal=0,
+        tipo_pago='efectivo',  # O toma del formulario de pago
+        total_puntos=0,  # Agregar lógica de puntos aquí
+        estado_id=1  # Estado en proceso
+    )
+
+    # Crear líneas de pedido y actualizar el total del pedido
+    for item in items:
+        LineaPedidos.objects.create(
+            pedido=pedido,
+            platillo=item.platillo,
+            cantidad=item.cantidad,
+            total_orden=item.total,
+            valor_puntos=item.platillo.precio_puntos
+        )
+        pedido.total += item.total
+        pedido.subtotal += item.total
+
+    pedido.save()
+
+    # Limpiar el carrito después de crear el pedido
+    carrito.items.all().delete()
+
+    return redirect('ver_pedido', pedido_id=pedido.id_pedido)
+
+def quitar_unidad_carrito(request, platillo_id):
+    """Eliminar una unidad de un platillo del carrito"""
+    carrito = obtener_carrito(request)
+    item = get_object_or_404(ItemCarrito, carrito=carrito, platillo__id_platillo=platillo_id)
+
+    # Si la cantidad es mayor a 1, reducimos la cantidad
+    if item.cantidad > 1:
+        item.cantidad -= 1
+        item.actualizar_total()  # Recalcular el total del item
+    else:
+        # Si la cantidad es 1, eliminamos el item del carrito
+        item.delete()
+
+    return redirect('ver_carrito')
+
+def eliminar_del_carrito(request, platillo_id):
+    """Eliminar un platillo completo del carrito"""
+    carrito = obtener_carrito(request)
+    item = get_object_or_404(ItemCarrito, carrito=carrito, platillo__id_platillo=platillo_id)
+    item.delete()  # Eliminar el item del carrito
+    return redirect('ver_carrito')
+
+def vaciar_carrito(request):
+    """Vaciar todo el carrito"""
+    carrito = obtener_carrito(request)
+    carrito.items.all().delete()  # Eliminar todos los items del carrito
+    return redirect('ver_carrito')
+
+@login_required(login_url='/accounts/login/') 
+def registro_pedido_cliente(request):
+
+        # Mostrar los platillos disponibles y el carrito
+    platillos = Platillo.objects.all()
+    carrito = obtener_carrito(request) 
+    items = carrito.items.all()
+    total_puntos = 0
+    total = sum(item.total for item in items)
+    for item in items:
+        platillo = item.platillo
+        cantidad = item.cantidad
+        total_puntos += platillo.precio_puntos * cantidad
+        print(total_puntos)
+
+    usuario= request.user
+    mas_campos = usuario.mascampos
+    datos_usuario = {
+        'nombre': usuario.get_full_name(),
+        'correo': usuario.email,
+        'telefono': mas_campos.telefono,
+        'direccion': mas_campos.direccion,
+        }
+
+    if request.method == 'POST':
+        try:
+            # Datos de los platillos del carrito (se pueden obtener del carrito del usuario)
+            carrito = obtener_carrito(request)  # Suponiendo que ya tienes la función obtener_carrito para obtener el carrito del usuario
+            items = carrito.items.all()
+            
+            tipo_pago=request.POST.get('tipo_pago')
+            total = 0
+            total_puntos = 0
+            recompensa_puntos = 0  # Inicializamos la variable aquí
+            carrito = obtener_carrito(request) 
+            items = carrito.items.all()
+            puntos_usuario = Puntos.objects.filter(user=request.user).first()
+
+            if tipo_pago =="no_pago":
+                     total = sum(item.total for item in items)
+                     for item in items:
+                         platillo = item.platillo
+                         cantidad = item.cantidad
+                         total_puntos += platillo.precio_puntos * cantidad
+                         print(total_puntos)
+                         render_button = True
+                         messages.warning(request, 'Seleccione un metodo de pago')  
+                         return render(request, 'Cliente/registro_pedido.html', {
+                            'platillos': platillos,
+                            'carrito_items': carrito.items.all(),
+                            'total': total,
+                            'usuario': datos_usuario,
+                            'render_button':render_button,
+                            'total_puntos':total_puntos,
+                            })
+
+            if items != 0:
+                pedido = Pedido.objects.create(
+                usuario=request.user,  # El usuario autenticado
+                fecha=timezone.now(),
+                total=0,
+                subtotal=0,
+                tipo_pago=request.POST.get('tipo_pago', 'efectivo'),  # Obtenemos el tipo de pago del formulario (efectivo o tarjeta)
+                total_puntos=0,
+                estado=Estado.objects.get(nombre='Pendiente'))
+                
+                # Crear las lineas del pedido
+                for item in items:
+                    platillo = item.platillo
+                    cantidad = item.cantidad
+                    subtotal_orden = platillo.precio * cantidad
+                    puntos_orden = platillo.precio_puntos * cantidad
+                    # Sumar la recompensa por cada platillo
+                    recompensa_puntos += platillo.recompensa_puntos * cantidad
+                    total += subtotal_orden
+                    total_puntos += puntos_orden
+                    
+                    LineaPedidos.objects.create(
+                        pedido=pedido,
+                        platillo=platillo,
+                        cantidad=cantidad,
+                        total_orden=subtotal_orden,
+                        valor_puntos=puntos_orden
+                    )
+                    # Verificar si el usuario desea pagar con puntos                 
+                if tipo_pago == 'puntos':
+                    if request.user.puntos.puntos_acumulados >= total_puntos:
+                        pedido.total = 0
+                        pedido.total_puntos = total_puntos
+                        request.user.puntos.puntos_acumulados -= total_puntos
+                        request.user.puntos.save()
+                    else:
+                        render_button = True
+                        messages.warning(request, 'No tienes suficientes puntos para realizar la compra')  
+                        return render(request, 'Cliente/registro_pedido.html', {
+                            'platillos': platillos,
+                            'carrito_items': carrito.items.all(),
+                            'total': total,
+                            'usuario': datos_usuario,
+                            'render_button':render_button,
+                            'total_puntos':total_puntos,
+                            })
+                else:                    
+                    if puntos_usuario:                 
+                        puntos_usuario.puntos_acumulados += recompensa_puntos
+                    else:
+                        puntos_usuario = Puntos.objects.create(
+                        user=request.user,
+                        puntos_acumulados=recompensa_puntos,
+                        fecha_caducidad=(timezone.now() + timedelta(days=30)).date()
+                        )
+                           
+                    pedido.total = total  # Si paga en efectivo o con tarjeta, total es el total calculado
+                    pedido.subtotal = total
+                    pedido.save()                                                
+                    puntos_usuario.save()                                    
+                    
+                    messages.success(request, 'Registro exitoso. Pedido ID: #'+ str(pedido.id_pedido))  
+                    render_button=False         
+                    form_render=False   
+                    carrito = obtener_carrito(request) 
+                    carrito.items.all().delete()            
+                    return render (request,'Cliente/registro_pedido.html',{'render_button':render_button,'form_render':form_render})                                    
+            else:
+                  
+                  return render(request, 'Cliente/registro_pedido.html', {
+                     'platillos': platillos,
+                     'carrito_items': carrito.items.all(),
+                     'total': total,
+                     'usuario': datos_usuario,
+                     'render_button':render_button,
+                     'total_puntos':total_puntos,
+                     })
+                 
+        except Exception as e:                        
+            return JsonResponse({'error': str(e)}, status=500)
+    
+    if len(items) > 0:
+        render_button = True
+    else:
+        render_button = False
+
+    return render(request, 'Cliente/registro_pedido.html', {
+        'platillos': platillos,
+        'carrito_items': carrito.items.all(),
+        'total': total,
+        'usuario': datos_usuario,
+        'render_button':render_button,
+        'total_puntos':total_puntos,
+    })

@@ -32,6 +32,11 @@
             </div>
 
             <div class="form-group">
+                <label for="apellido">Apellido</label>
+                <input type="text" id="apellido" name="apellido" value="{{ user.last_name }}" required>
+            </div>
+
+            <div class="form-group">
                 <label for="email">Correo Electrónico</label>
                 <input type="email" id="email" name="email" value="{{ user.email }}" required>
             </div>
@@ -47,7 +52,7 @@
             </div>
 
             <div class="form-actions">
-                <button type="submit" class="btn-save">Guardar Cambios</button>
+                <button type="submit" class="btn-save w-full py-2 px-4 bg-black text-white font-semibold rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"><i class="fa-solid fa-check mr-2"></i> Guardar Cambios</button>
             </div>
         </form>
     </div>

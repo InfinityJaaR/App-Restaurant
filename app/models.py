@@ -121,3 +121,25 @@ class ClienteNoRegistrado(models.Model):
 
     def __str__(self):
         return f"Cliente No Registrado: {self.nombre}"
+
+class Carrito(models.Model):
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name='carrito', null=True, blank=True)
+    session_id = models.CharField(max_length=255, null=False, blank=True,default=0)
+
+    def __str__(self):
+        return f"Carrito de {self.usuario.username if self.usuario else self.session_id}"
+
+class ItemCarrito(models.Model):
+    carrito = models.ForeignKey(Carrito, related_name="items", on_delete=models.CASCADE)
+    platillo = models.ForeignKey(Platillo, on_delete=models.CASCADE)
+    cantidad = models.PositiveIntegerField()
+    precio_unitario = models.DecimalField(max_digits=10, decimal_places=2,default=0)
+    total = models.DecimalField(max_digits=10, decimal_places=2)
+
+    def __str__(self):
+        return f"{self.cantidad} x {self.platillo.nombre}"
+
+    def actualizar_total(self):
+        """Método para actualizar el total del item"""
+        self.total = self.cantidad * self.precio_unitario
+        self.save()

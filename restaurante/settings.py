@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -128,3 +129,11 @@ STATICFILES_DIRS = [BASE_DIR /"app" / 'static']
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+MEDIA_URL = '/'
+MEDIA_ROOT =os.path.join( BASE_DIR)
+
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'  # Usa sesiones almacenadas en la base de datos
+
+# Puedes cambiar la duración de la sesión si es necesario
+SESSION_COOKIE_AGE = 3600  # Duración de la sesión en segundos (1 hora)
