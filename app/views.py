@@ -8,8 +8,10 @@ from django.contrib import messages
 from django.contrib.auth import logout
 from django.core.paginator import Paginator
 from django.utils import timezone
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseBadRequest
 import json
+from django.shortcuts import get_object_or_404
+
 
 # Create your views here.
 @login_required
@@ -203,23 +205,53 @@ def perfil_cliente(request):
     }
     return render(request, 'Cliente/perfil.html', context)
 
-# crear vistas para el encargado de despacho
+# Vista para preparar pedidos
 @login_required
 def preparar_pedidos(request):
-    pedidos_preparando = Pedido.objects.filter(estado__nombre="Preparando")
     if request.method == "POST":
-        pedido_id = request.POST.get("pedido_id")
-        pedido = Pedido.objects.get(id_pedido=pedido_id)
-        pedido.estado = Estado.objects.get(nombre="Pendiente")
-        pedido.save()
-        messages.success(request, f"El pedido {pedido_id} está ahora en estado Pendiente.")
+        try:
+            # Obtener el ID del pedido desde el formulario
+            pedido_id = request.POST.get("pedido_id")
+
+            # Validar que se proporcionó el ID
+            if not pedido_id:
+                messages.error(request, "ID de pedido no proporcionado.")
+                return redirect("preparar_pedidos")
+
+            # Obtener el pedido y el estado "Pendiente"
+            pedido = get_object_or_404(Pedido, id_pedido=pedido_id)
+            estado_pendiente = get_object_or_404(Estado, nombre="Pendiente")
+
+            # Cambiar el estado del pedido
+            pedido.estado = estado_pendiente
+            pedido.save()
+
+            # Mostrar mensaje de éxito
+            messages.success(request, f"El pedido {pedido_id} ha sido cambiado a estado Pendiente.")
+        except Exception as e:
+            messages.error(request, f"Error al cambiar el estado del pedido: {str(e)}")
+
+        # Redirigir a la misma página
         return redirect("preparar_pedidos")
 
-    context = {
-        "pedidos_preparando": pedidos_preparando,
-    }
-    return render(request, "EncargadoDeDespacho/preparar_pedidos.html", context)
+    # Solicitudes GET: Mostrar los pedidos en estado "Preparando"
+    pedidos_preparando = Pedido.objects.filter(estado__nombre="Preparando")
+    return render(request, "EncargadoDeDespacho/preparar_pedidos.html", {"pedidos_preparando": pedidos_preparando})
 
+# Vista para obtener detalles del pedido (JSON para el frontend)
+@login_required
+def detalles_pedido(request, pedido_id):
+    try:
+        pedido = Pedido.objects.get(id_pedido=pedido_id)
+        lineas = pedido.lineas.all()
+        context = {
+            "pedido": pedido,
+            "lineas": lineas,
+        }
+        return render(request, "EncargadoDeDespacho/detalles_pedido.html", context)
+    except Pedido.DoesNotExist:
+        messages.error(request, "Pedido no encontrado")
+        return redirect("preparar_pedidos")
 
 @login_required
 def asignar_pedidos(request):

@@ -2,67 +2,71 @@
 {% load static %}
 
 {% block head %}
-<title>Preparar Pedidos</title>
+  <title>Preparar Pedidos</title>
 {% endblock %}
 
 {% block content %}
-<div class="container mx-auto p-6">
-    <h1 class="text-3xl font-bold mb-6">Preparar Pedidos</h1>
+<div class="container mx-auto p-6 flex justify-center">
+  <div class="w-full max-w-4xl bg-white shadow-md rounded-lg p-6">
+    <h1 class="text-3xl font-bold mb-6 text-center">Preparar Pedidos</h1>
 
-    {% if messages %}
-    <div class="mb-4">
+    <!-- Mensajes del servidor -->
+    <div id="server-messages" class="space-y-4">
+      {% if messages %}
         {% for message in messages %}
-        <div class="bg-{{ message.tags }}-500 text-white font-bold p-4 rounded mb-2">{{ message }}</div>
+          <div class="p-4 rounded-lg shadow-md bg-green-200 border-l-4 border-green-500 text-green-800 mb-4">
+            {{ message }}
+          </div>
         {% endfor %}
+      {% endif %}
     </div>
-    {% endif %}
 
-    <table class="w-full table-auto border-collapse">
+    <!-- Tabla de pedidos -->
+    <div class="overflow-x-auto">
+      <table class="w-full table-auto border-collapse mt-6">
         <thead>
-            <tr class="bg-gray-200 text-gray-700">
-                <th class="border px-4 py-2">ID Pedido</th>
-                <th class="border px-4 py-2">Cliente</th>
-                <th class="border px-4 py-2">Total</th>
-                <th class="border px-4 py-2">Estado</th>
-                <th class="border px-4 py-2">Acciones</th>
-            </tr>
+          <tr class="bg-gray-200 text-gray-700">
+            <th class="border px-4 py-2">ID</th>
+            <th class="border px-4 py-2">Cliente</th>
+            <th class="border px-4 py-2">Total</th>
+            <th class="border px-4 py-2">Estado</th>
+            <th class="border px-4 py-2">Detalles</th>
+            <th class="border px-4 py-2">Acciones</th>
+          </tr>
         </thead>
         <tbody>
-            {% for pedido in pedidos_preparando %}
+          {% for pedido in pedidos_preparando %}
             <tr class="border-b">
-                <td class="border px-4 py-2">{{ pedido.id_pedido }}</td>
-                <td class="border px-4 py-2">{{ pedido.get_cliente_nombre }}</td>
-                <td class="border px-4 py-2">${{ pedido.total }}</td>
-                <td class="border px-4 py-2">{{ pedido.estado.nombre }}</td>
-                <td class="border px-4 py-2">
-                    <button class="bg-blue-500 text-white py-2 px-4 rounded" onclick="verDetalles({{ pedido.id_pedido }})">Ver Detalles</button>
-                    <form method="post" class="inline-block">
-                        {% csrf_token %}
-                        <input type="hidden" name="pedido_id" value="{{ pedido.id_pedido }}">
-                        <button type="submit" class="bg-green-500 text-white py-2 px-4 rounded">Marcar como Pendiente</button>
-                    </form>
-                </td>
+              <td class="border px-4 py-2 whitespace-nowrap">{{ pedido.id_pedido }}</td>
+              <td class="border px-4 py-2 whitespace-nowrap">
+                {{ pedido.usuario.first_name }} {{ pedido.usuario.last_name }}
+                {% if not pedido.usuario %}{{ pedido.cliente_no_registrado.nombre }}{% endif %}
+              </td>
+              <td class="border px-4 py-2 whitespace-nowrap">${{ pedido.total }}</td>
+              <td class="border px-4 py-2 whitespace-nowrap estado">{{ pedido.estado.nombre }}</td>
+              <td class="border px-4 py-2 text-center whitespace-nowrap">
+                <a href="{% url 'detalles_pedido' pedido.id_pedido %}" class="bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded w-40 text-center">
+                  Ver Detalles
+                </a>
+              </td>
+              <td class="border px-4 py-2 text-center whitespace-nowrap">
+                <form method="POST" action="{% url 'preparar_pedidos' %}">
+                  {% csrf_token %}
+                  <input type="hidden" name="pedido_id" value="{{ pedido.id_pedido }}">
+                  <button type="submit" class="bg-green-500 hover:bg-green-700 text-white py-2 px-4 rounded w-30 text-center">
+                    Marcar como Pendiente
+                  </button>
+                </form>
+              </td>
             </tr>
-            {% endfor %}
+          {% endfor %}
         </tbody>
-    </table>
-
-    <div id="pedido-detalles" class="hidden mt-6 bg-white shadow-md rounded-lg p-6">
-        <h2 class="text-2xl font-bold mb-4">Detalles del Pedido</h2>
-        <table class="w-full table-auto border-collapse">
-            <thead>
-                <tr class="bg-gray-200 text-gray-700">
-                    <th class="border px-4 py-2">Platillo</th>
-                    <th class="border px-4 py-2">Cantidad</th>
-                    <th class="border px-4 py-2">Subtotal</th>
-                </tr>
-            </thead>
-            <tbody id="detalles-list"></tbody>
-        </table>
+      </table>
     </div>
+  </div>
 </div>
 {% endblock %}
 
 {% block scripts %}
-<script src="{% static 'js/preparar_pedidos.js' %}"></script>
+  <script src="{% static 'js/registro_pedidos.js' %}"></script>
 {% endblock %}

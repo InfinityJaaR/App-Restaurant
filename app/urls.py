@@ -14,6 +14,7 @@ urlpatterns = [
     path('pedidos/<int:id_pedido>/', detalle_pedido, name='detalle_pedido'),
     path('usuarios/eliminar/<int:id>/', eliminarUsuario, name='eliminarUsuario'),
     path('preparar_pedidos/', preparar_pedidos, name='preparar_pedidos'),
+    path('detalles_pedido/<int:pedido_id>/', detalles_pedido, name='detalles_pedido'),
     path('asignar_pedidos/', asignar_pedidos, name='asignar_pedidos'),
     path('registro_pedidos_no_registrados/', registro_pedidos_no_registrados, name='registro_pedidos_no_registrados'),
     path('perfil-cliente/', perfil_cliente, name='perfil_cliente'),
