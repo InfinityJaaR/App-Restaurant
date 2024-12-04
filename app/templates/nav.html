@@ -60,8 +60,11 @@
             {% endif %}
 
             {% if user.groups.all.0.name == 'Encargado de Despachos' %}
-            <li><a href="{% url 'gestion_pedidos' %}" class="nav-item">
-                <i class="fas fa-box"></i> Pedidos
+            <li><a href="{% url 'preparar_pedidos' %}" class="nav-item">
+                <i class="fas fa-box"></i> Preparar Pedidos
+            </a></li>
+            <li><a href="{% url 'asignar_pedidos' %}" class="nav-item">
+                <i class="fas fa-box"></i> Asignar Pedidos
             </a></li>
             {% endif %}
 

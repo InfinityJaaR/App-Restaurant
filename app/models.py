@@ -75,8 +75,12 @@ class Pedido(models.Model):
 
     def __str__(self):
         return f"Pedido {self.id_pedido} de {self.usuario or self.cliente_no_registrado}"
-
-
+    def get_cliente_nombre(self):
+        if self.usuario:
+            return f"{self.usuario.first_name} {self.usuario.last_name}"
+        elif self.cliente_no_registrado:
+            return self.cliente_no_registrado.nombre
+        return "Cliente desconocido"
 
 class LineaPedidos(models.Model):
     id_linea_pedido = models.AutoField(primary_key=True)

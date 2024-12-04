@@ -1,0 +1,54 @@
+{% extends 'nav.html' %}
+{% load static %}
+
+{% block head %}
+  <title>Detalles del Pedido</title>
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto p-6 flex justify-center">
+  <div class="w-full max-w-2xl bg-white shadow-lg rounded-lg p-8">
+    <h1 class="text-3xl font-bold text-center mb-6">Detalles del Pedido</h1>
+
+    <!-- Mensajes del servidor -->
+    <div id="server-messages" class="space-y-4">
+      {% if messages %}
+        {% for message in messages %}
+          <div class="p-4 rounded-lg shadow-md bg-{{ message.tags|default:'blue' }}-200 border-l-4 border-{{ message.tags|default:'blue' }}-500">
+            <p class="font-semibold text-{{ message.tags|default:'blue' }}-800">{{ message }}</p>
+          </div>
+        {% endfor %}
+      {% endif %}
+    </div>
+
+    <!-- Información del pedido -->
+    <div class="bg-gray-100 p-6 rounded-lg shadow mb-6">
+      <h2 class="text-xl font-bold mb-4">Información del Pedido</h2>
+      <p><strong>ID:</strong> {{ pedido.id_pedido }}</p>
+      <p><strong>Cliente:</strong> {{ pedido.usuario.first_name }} {{ pedido.usuario.last_name }} {% if not pedido.usuario %}{{ pedido.cliente_no_registrado.nombre }}{% endif %}</p>
+      <p><strong>Estado:</strong> {{ pedido.estado.nombre }}</p>
+      <p><strong>Total:</strong> ${{ pedido.total }}</p>
+    </div>
+
+    <!-- Productos -->
+    <div class="bg-gray-100 p-6 rounded-lg shadow mb-6">
+      <h2 class="text-xl font-bold mb-4">Productos</h2>
+      <ul class="divide-y divide-gray-300">
+        {% for linea in pedido.lineas.all %}
+          <li class="py-2">
+            <span class="font-semibold">{{ linea.platillo.nombre }}</span> 
+            <span class="text-sm text-gray-600">(Cantidad: {{ linea.cantidad }})</span>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <!-- Botón de regreso -->
+    <div class="mt-6 text-center">
+      <a href="{% url 'preparar_pedidos' %}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg">
+        Volver
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}
