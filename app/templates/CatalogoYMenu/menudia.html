@@ -1,0 +1,33 @@
+{% extends 'nav.html' %}
+{% load static %}
+
+{% block head %}
+<title>Menú del Día</title>
+<link rel="stylesheet" href="{% static 'css/menudia.css' %}">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="content-wrapper">
+        <div class="titulo">
+            <h1>Menú del Día</h1>
+        </div>
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+            <div class="message {{ message.tags }}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="menu-container">
+
+          
+        </div>
+
+    </div>
+</div>
+{% endblock %}

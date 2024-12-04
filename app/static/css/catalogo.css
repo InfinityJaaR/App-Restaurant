@@ -23,10 +23,44 @@
     font-weight: 600;
 }
 
-.titulo h1 {
+.titulo {
+    text-align: center;
+    margin-bottom: 1rem;
     color: #2c3e50;
     font-size: 1.8rem;
     font-weight: 600;
+}
+
+.textbar-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: black;
+    border-radius: 2rem;
+}
+
+.textbar-text {
+    flex: 1;
+    color: white;
+    padding: 1rem;
+    font-size: 1.4rem;
+    margin-left: 0.5rem;
+}
+
+.textbar-addbtn {
+    border-left: #f8f9fa 0.2rem solid;
+    flex: 0;
+    padding: 0.2rem 1rem 0.2rem 1rem;
+    margin: 0.5rem 2rem 0.5rem 1rem;
+    color:white;
+    text-align: right;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.textbar-addbtn:hover {
+    transform: translateY(-2px);
 }
 
 .catalogo {

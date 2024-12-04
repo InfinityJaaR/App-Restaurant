@@ -309,3 +309,19 @@ def registro_pedidos_no_registrados(request):
         'platillos': platillos
     }
     return render(request, 'RegistroDePedidos/registro_pedidos_no_registrados.html', context)
+
+@login_required
+def gestionar_platillos(request):
+    platillos = Platillo.objects.all()
+    context = {
+        'platillos': platillos
+    }
+    return render(request, 'CatalogoYMenu/catalogo.html', context)
+
+@login_required
+def menu_diario(request):
+    platillos = Platillo.objects.all()
+    context = {
+        'platillos': platillos
+    }
+    return render(request, 'CatalogoYMenu/menudia.html', context)

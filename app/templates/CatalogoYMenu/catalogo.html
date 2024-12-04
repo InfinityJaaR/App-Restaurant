@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block head %}
-<title>GestionarCatalogo</title>
+<title>Gestionar Catálogo</title>
 <link rel="stylesheet" href="{% static 'css/catalogo.css' %}">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
 {% endblock %}
@@ -22,7 +22,16 @@
             {% endfor %}
         </div>
         {% endif %}
-        
+
+        <div class="textbar-container">
+            <div class="textbar-text">
+                <h2>Platillos</h2>
+            </div>
+            <div class="textbar-addbtn">
+                <a href="#">Agregar Platillo</a>
+            </div>
+        </div>
+
         <div class="catalogo">
             <div class="row">
                 {% for platillo in platillos %}

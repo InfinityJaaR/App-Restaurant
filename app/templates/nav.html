@@ -51,7 +51,7 @@
             </a></li>
             {% endif %}
             {% if user.groups.all.0.name == 'Encargado de Menu' %}
-            <li><a href="/menu" class="nav-item">
+            <li><a href="{% url 'menu_diario' %}" class="nav-item">
                 <i class="fas fa-utensils"></i> Menú
             </a></li>
             <li><a href="/reservas" class="nav-item">

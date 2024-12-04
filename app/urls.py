@@ -16,4 +16,7 @@ urlpatterns = [
     path('gestion_pedidos/', gestion_pedidos, name='gestion_pedidos'),
     path('registro_pedidos_no_registrados/', registro_pedidos_no_registrados, name='registro_pedidos_no_registrados'),
     path('perfil-cliente/', perfil_cliente, name='perfil_cliente'),
+    path('gestion_platillos/', gestionar_platillos, name='gestion_platillos'),
+    path('gestion_platillos/agregar_platillo/', agregar_platillo, name='agregar_platillo'),
+    path('menu_dia/', menu_diario, name='menu_diario'),
 ]
