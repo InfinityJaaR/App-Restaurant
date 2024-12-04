@@ -8,6 +8,9 @@ from django.contrib import messages
 from django.contrib.auth import logout
 from django.core.paginator import Paginator
 from django.utils import timezone
+from django.urls import path
+from .models import Cupon, Puntos, MasCampos
+import json
 
 # Create your views here.
 @login_required
@@ -309,3 +312,61 @@ def registro_pedidos_no_registrados(request):
         'platillos': platillos
     }
     return render(request, 'RegistroDePedidos/registro_pedidos_no_registrados.html', context)
+
+# Views
+
+def desactivar_puntos(request):
+    if request.method == 'POST':
+        Puntos.objects.update(disponibilidad=False)
+        messages.success(request, 'Todos los puntos han sido desactivados correctamente.')
+        return redirect('gestionar_regalias')
+
+def reactivar_puntos(request):
+    if request.method == 'POST':
+        Puntos.objects.filter(fecha_caducidad__gte=timezone.now()).update(disponibilidad=True)
+        messages.success(request, 'Puntos válidos han sido reactivados correctamente.')
+        return redirect('gestionar_regalias')
+
+def desactivar_cupones(request):
+    if request.method == 'POST':
+        Cupon.objects.update(disponibilidad=False)
+        messages.success(request, 'Todos los cupones han sido desactivados correctamente.')
+        return redirect('gestionar_regalias')
+
+def reactivar_cupones(request):
+    if request.method == 'POST':
+        Cupon.objects.filter(fecha_expiracion__gte=timezone.now()).update(disponibilidad=True)
+        messages.success(request, 'Cupones válidos han sido reactivados correctamente.')
+        return redirect('gestionar_regalias')
+
+def crear_cupon(request):
+    if request.method == 'POST':
+        codigo = request.POST['codigo']
+        descuento = request.POST['descuento']
+        fecha_expiracion = request.POST['fecha_expiracion']
+        
+        # Validar que la fecha no sea menor a hoy
+        if fecha_expiracion < str(timezone.now().date()):
+            messages.error(request, 'La fecha de expiración no puede ser menor a la de hoy.')
+            return redirect('gestionar_regalias')
+
+        Cupon.objects.create(
+            codigo=codigo,
+            descuento=descuento,
+            fecha_expiracion=fecha_expiracion,
+            disponibilidad=True
+        )
+        messages.success(request, 'Cupón creado exitosamente.')
+        return redirect('gestionar_regalias')
+
+def gestionar_regalias(request):
+    cupones_list = Cupon.objects.all()
+    query = request.GET.get('q')
+    if query:
+        cupones_list = cupones_list.filter(codigo__icontains=query)
+
+    paginator = Paginator(cupones_list, 4)  # Máximo de 4 cupones por página
+    page_number = request.GET.get('page')
+    cupones = paginator.get_page(page_number)
+
+    return render(request, 'Administrador/gestionarRegalias.html', {'cupones': cupones})
