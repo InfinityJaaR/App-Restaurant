@@ -212,34 +212,31 @@ def perfil_cliente(request):
 @login_required
 def preparar_pedidos(request):
     if request.method == "POST":
-        try:
-            # Obtener el ID del pedido desde el formulario
-            pedido_id = request.POST.get("pedido_id")
+        # Procesar el formulario enviado por el método POST
+        pedido_id = request.POST.get("pedido_id")
+        if not pedido_id:
+            return JsonResponse({"success": False, "message": "ID de pedido no proporcionado."}, status=400)
 
-            # Validar que se proporcionó el ID
-            if not pedido_id:
-                messages.error(request, "ID de pedido no proporcionado.")
-                return redirect("preparar_pedidos")
+        pedido = get_object_or_404(Pedido, id_pedido=pedido_id)
 
-            # Obtener el pedido y el estado "Pendiente"
-            pedido = get_object_or_404(Pedido, id_pedido=pedido_id)
-            estado_pendiente = get_object_or_404(Estado, nombre="Pendiente")
+        # Verificar que el estado "Pendiente" exista
+        estado_pendiente = Estado.objects.filter(nombre="Pendiente").first()
+        if not estado_pendiente:
+            return JsonResponse({"success": False, "message": "Estado 'Pendiente' no encontrado."}, status=404)
 
-            # Cambiar el estado del pedido
-            pedido.estado = estado_pendiente
-            pedido.save()
+        # Actualizar el estado del pedido
+        pedido.estado = estado_pendiente
+        pedido.save()
 
-            # Mostrar mensaje de éxito
-            messages.success(request, f"El pedido {pedido_id} ha sido cambiado a estado Pendiente.")
-        except Exception as e:
-            messages.error(request, f"Error al cambiar el estado del pedido: {str(e)}")
+        return JsonResponse({"success": True, "message": f"Pedido {pedido_id} ahora está en estado Pendiente."}, status=200)
 
-        # Redirigir a la misma página
-        return redirect("preparar_pedidos")
-
-    # Solicitudes GET: Mostrar los pedidos en estado "Preparando"
+    # Mostrar la tabla con la paginación
     pedidos_preparando = Pedido.objects.filter(estado__nombre="Preparando")
-    return render(request, "EncargadoDeDespacho/preparar_pedidos.html", {"pedidos_preparando": pedidos_preparando})
+    paginator = Paginator(pedidos_preparando, 6)  # Mostrar 6 pedidos por página
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+
+    return render(request, "EncargadoDeDespacho/preparar_pedidos.html", {"page_obj": page_obj})
 
 # Vista para obtener detalles del pedido (JSON para el frontend)
 @login_required
@@ -262,6 +259,12 @@ def asignar_pedidos(request):
     repartidores_disponibles = User.objects.filter(
         groups__name="Repartidor", mascampos__is_active=True
     )
+
+    # Paginación para pedidos pendientes
+    pedidos_paginator = Paginator(pedidos_pendientes, 3)  # Mostrar 3 pedidos por página
+    pedidos_page_number = request.GET.get('pedidos_page')
+    pedidos_page_obj = pedidos_paginator.get_page(pedidos_page_number)
+
     if request.method == "POST":
         pedido_id = request.POST.get("pedido_id")
         pedido = Pedido.objects.get(id_pedido=pedido_id)
@@ -280,7 +283,7 @@ def asignar_pedidos(request):
         return redirect("asignar_pedidos")
 
     context = {
-        "pedidos_pendientes": pedidos_pendientes,
+        "pedidos_page_obj": pedidos_page_obj,
         "repartidores_disponibles": repartidores_disponibles,
     }
     return render(request, "EncargadoDeDespacho/asignar_pedidos.html", context)

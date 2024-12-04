@@ -13,7 +13,7 @@
       {% if messages %}
         <div class="messages space-y-4">
           {% for message in messages %}
-            <div class="p-4 rounded-lg shadow-md bg-{{ message.tags|default:'blue' }}-200 border-l-4 border-{{ message.tags|default:'blue' }}-500">
+            <div class="p-4 rounded-lg shadow-md bg-{{ message.tags|default:'blue' }}-200 border-l-4 border-{{ message.tags|default:'blue' }}-500 transition duration-300 ease-in-out transform hover:scale-105">
               <p class="font-semibold text-{{ message.tags|default:'blue' }}-800">{{ message }}</p>
             </div>
           {% endfor %}
@@ -33,7 +33,7 @@
             </tr>
           </thead>
           <tbody>
-            {% for pedido in pedidos_pendientes %}
+            {% for pedido in pedidos_page_obj %}
               <tr class="border-b">
                 <td class="border px-4 py-2">{{ pedido.id_pedido }}</td>
                 <td class="border px-4 py-2">{{ pedido.get_cliente_nombre }}</td>
@@ -50,6 +50,39 @@
             {% endfor %}
           </tbody>
         </table>
+      </div>
+
+      <!-- Paginación para pedidos pendientes -->
+      <div class="flex justify-center items-center mt-4">
+        <nav class="flex items-center space-x-2" aria-label="Pagination">
+          {% if pedidos_page_obj.has_previous %}
+            <a href="?pedidos_page={{ pedidos_page_obj.previous_page_number }}" class="bg-gray-200 text-gray-600 hover:bg-gray-300 px-3 py-2 rounded-md">
+              &laquo;
+            </a>
+          {% else %}
+            <span class="bg-gray-200 text-gray-400 px-3 py-2 rounded-md cursor-not-allowed">
+              &laquo;
+            </span>
+          {% endif %}
+
+          {% for num in pedidos_page_obj.paginator.page_range %}
+            {% if pedidos_page_obj.number == num %}
+              <span class="bg-blue-500 text-white px-4 py-2 rounded-md">{{ num }}</span>
+            {% else %}
+              <a href="?pedidos_page={{ num }}" class="bg-gray-200 text-gray-600 hover:bg-gray-300 px-3 py-2 rounded-md">{{ num }}</a>
+            {% endif %}
+          {% endfor %}
+
+          {% if pedidos_page_obj.has_next %}
+            <a href="?pedidos_page={{ pedidos_page_obj.next_page_number }}" class="bg-gray-200 text-gray-600 hover:bg-gray-300 px-3 py-2 rounded-md">
+              &raquo;
+            </a>
+          {% else %}
+            <span class="bg-gray-200 text-gray-400 px-3 py-2 rounded-md cursor-not-allowed">
+              &raquo;
+            </span>
+          {% endif %}
+        </nav>
       </div>
 
       <h2 class="text-2xl font-semibold mt-8 mb-4">Repartidores Disponibles</h2>
