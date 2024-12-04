@@ -33,14 +33,24 @@
     <!-- Productos -->
     <div class="bg-gray-100 p-6 rounded-lg shadow mb-6">
       <h2 class="text-xl font-bold mb-4">Productos</h2>
-      <ul class="divide-y divide-gray-300">
-        {% for linea in pedido.lineas.all %}
-          <li class="py-2">
-            <span class="font-semibold">{{ linea.platillo.nombre }}</span> 
-            <span class="text-sm text-gray-600">(Cantidad: {{ linea.cantidad }})</span>
-          </li>
-        {% endfor %}
-      </ul>
+      <table class="w-full table-auto border-collapse">
+        <thead>
+          <tr class="bg-gray-200 text-gray-700">
+            <th class="border px-4 py-2">Nombre del Platillo</th>
+            <th class="border px-4 py-2">Cantidad</th>
+            <th class="border px-4 py-2">Subtotal</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for linea in pedido.lineas.all %}
+            <tr class="border-b">
+              <td class="border px-4 py-2">{{ linea.platillo.nombre }}</td>
+              <td class="border px-4 py-2">{{ linea.cantidad }}</td>
+              <td class="border px-4 py-2">${{ linea.total_orden }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
     </div>
 
     <!-- Botón de regreso -->
