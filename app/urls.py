@@ -13,7 +13,8 @@ urlpatterns = [
     path('pedidos/', pedidos, name='pedidos'),
     path('pedidos/<int:id_pedido>/', detalle_pedido, name='detalle_pedido'),
     path('usuarios/eliminar/<int:id>/', eliminarUsuario, name='eliminarUsuario'),
-    path('gestion_pedidos/', gestion_pedidos, name='gestion_pedidos'),
+    path('preparar_pedidos/', preparar_pedidos, name='preparar_pedidos'),
+    path('asignar_pedidos/', asignar_pedidos, name='asignar_pedidos'),
     path('registro_pedidos_no_registrados/', registro_pedidos_no_registrados, name='registro_pedidos_no_registrados'),
     path('perfil-cliente/', perfil_cliente, name='perfil_cliente'),
 ]

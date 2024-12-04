@@ -203,46 +203,54 @@ def perfil_cliente(request):
     }
     return render(request, 'Cliente/perfil.html', context)
 
-# create views gestion_pedidos
+# crear vistas para el encargado de despacho
 @login_required
-def gestion_pedidos(request):
-    # Obtener los pedidos pendientes, en proceso y repartidores disponibles desde la base de datos
-    pedidos_pendientes = Pedido.objects.filter(estado__nombre="Pendiente")
-    pedidos_en_proceso = Pedido.objects.filter(estado__nombre="En Proceso")
-    repartidores_disponibles = User.objects.filter(groups__name='Repartidor', mascampos__is_active=True)
-
-    if request.method == 'POST':
-        pedido_id = request.POST.get('pedido_id')
-        accion = request.POST.get('accion')
+def preparar_pedidos(request):
+    pedidos_preparando = Pedido.objects.filter(estado__nombre="Preparando")
+    if request.method == "POST":
+        pedido_id = request.POST.get("pedido_id")
         pedido = Pedido.objects.get(id_pedido=pedido_id)
-
-        if accion == 'en_proceso':
-            pedido.estado = Estado.objects.get(nombre="En Proceso")
-            pedido.save()
-            messages.success(request, f'Pedido {pedido.id_pedido} está ahora en proceso.')
-
-        elif accion == 'listo_para_despacho':
-            repartidor = repartidores_disponibles.first()
-            if repartidor:
-                # Asignar pedido al repartidor
-                pedido.usuario = repartidor
-                pedido.estado = Estado.objects.get(nombre="En Camino")
-                pedido.fecha = timezone.now()
-                pedido.save()
-                messages.success(request, f'Pedido {pedido.id_pedido} asignado a {repartidor.first_name} {repartidor.last_name} y está en camino.')
-            else:
-                # No hay repartidores disponibles, pedido sigue pendiente
-                pedido.estado = Estado.objects.get(nombre="Pendiente")
-                pedido.save()
-                messages.warning(request, f'No hay repartidores disponibles para el pedido {pedido.id_pedido}. El pedido quedará pendiente.')
+        pedido.estado = Estado.objects.get(nombre="Pendiente")
+        pedido.save()
+        messages.success(request, f"El pedido {pedido_id} está ahora en estado Pendiente.")
+        return redirect("preparar_pedidos")
 
     context = {
-        'pedidos_pendientes': pedidos_pendientes,
-        'pedidos_en_proceso': pedidos_en_proceso,
-        'repartidores': repartidores_disponibles
+        "pedidos_preparando": pedidos_preparando,
     }
-    return render(request, 'EncargadoDeDespacho/gestion_pedidos.html', context)
+    return render(request, "EncargadoDeDespacho/preparar_pedidos.html", context)
 
+
+@login_required
+def asignar_pedidos(request):
+    pedidos_pendientes = Pedido.objects.filter(estado__nombre="Pendiente")
+    repartidores_disponibles = User.objects.filter(
+        groups__name="Repartidor", mascampos__is_active=True
+    )
+    if request.method == "POST":
+        pedido_id = request.POST.get("pedido_id")
+        pedido = Pedido.objects.get(id_pedido=pedido_id)
+        repartidor = repartidores_disponibles.first()
+
+        if repartidor:
+            pedido.repartidor = repartidor
+            pedido.estado = Estado.objects.get(nombre="En Camino")
+            repartidor.mascampos.is_active = False
+            repartidor.mascampos.save()
+            pedido.save()
+            messages.success(request, f"Pedido {pedido_id} asignado a {repartidor.first_name}.")
+        else:
+            messages.warning(request, f"No hay repartidores disponibles para el pedido {pedido_id}.")
+
+        return redirect("asignar_pedidos")
+
+    context = {
+        "pedidos_pendientes": pedidos_pendientes,
+        "repartidores_disponibles": repartidores_disponibles,
+    }
+    return render(request, "EncargadoDeDespacho/asignar_pedidos.html", context)
+
+#crear vista para el encargado de pedidos
 @login_required
 @csrf_exempt
 def registro_pedidos_no_registrados(request):
