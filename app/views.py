@@ -15,6 +15,7 @@ from datetime import timedelta
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.core.exceptions import ValidationError
+from django.core.files.storage import FileSystemStorage
 
 # Create your views here.
 @login_required
@@ -737,24 +738,26 @@ def agregar_platillo(request):
     if request.method == 'POST':
         nombre = request.POST.get('nombre')
         descripcion = request.POST.get('descripcion')
-        imagen = request.POST.get('imagen')
+        imagen = request.FILES.get('imagen')
         precio = request.POST.get('precio')
         precio_puntos = request.POST.get('precio_puntos')
         recompensa_puntos = request.POST.get('recompensa_puntos')
         platillo_dia = request.POST.get('platillo_dia')
         cantidad_maxima = request.POST.get('cantidad_maxima')
 
+        fs = FileSystemStorage()
+        filename = fs.save(imagen.name, imagen)
+        uploaded_file_url = fs.url(filename)
         platillo = Platillo.objects.create(
             nombre=nombre,
             descripcion=descripcion,
-            imagen=imagen,
+            imagen=uploaded_file_url,
             precio=precio,
             precio_puntos=precio_puntos,
             recompensa_puntos=recompensa_puntos,
             platillo_dia=platillo_dia,
             cantidad_maxima=cantidad_maxima
         )
-        messages.success(request, 'Platillo agregado exitosamente')
         return redirect('gestion_platillos')
 
     return render(request, 'CatalogoYMenu/AgregarPlatillo.html')
