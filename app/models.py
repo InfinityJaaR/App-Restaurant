@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User 
 from django.core.validators import MinValueValidator, MaxValueValidator
+from datetime import date
 
 class MasCampos(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -20,6 +21,12 @@ class Puntos(models.Model):
 
     def __str__(self):
         return f"Puntos de {self.user.username}"
+    
+    def son_validos(self):
+        """
+        Comprueba si los puntos son válidos (no caducados y disponibles).
+        """
+        return self.disponibilidad and (self.fecha_caducidad is None or self.fecha_caducidad >= date.today())
 
 
 class Estado(models.Model):
@@ -103,6 +110,11 @@ class Cupon(models.Model):
 
     def __str__(self):
         return self.codigo
+    
+    def aplicar_descuento(self, precio):        
+        descuento_decimal = self.descuento / 100  # Convierte el porcentaje en decimal
+        precio_con_descuento = precio * (1 - descuento_decimal)
+        return precio_con_descuento
 
 
 class Reclamo(models.Model):

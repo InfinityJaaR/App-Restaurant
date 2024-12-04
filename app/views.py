@@ -15,6 +15,7 @@ from datetime import timedelta
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.core.exceptions import ValidationError
+from django.views.decorators.cache import never_cache
 
 # Create your views here.
 @login_required
@@ -432,13 +433,20 @@ def gestionar_regalias(request):
 #Cliente
 def consultar_menu(request):
     platillos = Platillo.objects.all()
-    platillos_dia = Platillo.objects.filter(platillo_dia=True)
-    print(platillos_dia)
+    platillos_dia = Platillo.objects.filter(platillo_dia=True)    
     context = {
         'platillos': platillos,
         'platillos_dia': list(platillos_dia)
     }
     return render(request, 'Cliente/consultar_menu.html', context)
+
+@login_required
+def consultar_menu_dia(request):
+    platillos_dia = Platillo.objects.filter(platillo_dia=True)
+    context = {
+        'platillos_dia': platillos_dia
+    }
+    return render(request, 'Cliente/consultar_menu_dia.html', context)
 
 def obtener_carrito(request):
     """Obtiene el carrito del usuario si está autenticado o crea uno temporal para no autenticados."""
@@ -479,7 +487,7 @@ def agregar_carrito(request, platillo_id):
     item.actualizar_total()
 
     return redirect('ver_carrito')
-
+@never_cache
 def ver_carrito(request):
     """Mostrar los items en el carrito del usuario"""
     carrito = obtener_carrito(request)
@@ -565,6 +573,7 @@ def vaciar_carrito(request):
     carrito.items.all().delete()  # Eliminar todos los items del carrito
     return redirect('ver_carrito')
 
+@never_cache
 @login_required(login_url='/accounts/login/') 
 def registro_pedido_cliente(request):
 
@@ -596,8 +605,10 @@ def registro_pedido_cliente(request):
             items = carrito.items.all()
             
             tipo_pago=request.POST.get('tipo_pago')
+            cuponAux=request.POST.get('cupon')
             total = 0
             total_puntos = 0
+            subtotal=0            
             recompensa_puntos = 0  # Inicializamos la variable aquí
             carrito = obtener_carrito(request) 
             items = carrito.items.all()
@@ -649,24 +660,91 @@ def registro_pedido_cliente(request):
                         total_orden=subtotal_orden,
                         valor_puntos=puntos_orden
                     )
-                    # Verificar si el usuario desea pagar con puntos                 
+                    
+                    subtotal = total                            
+                    if cuponAux!="":                        
+                        try:         
+                            print(cuponAux)
+                            cupon = Cupon.objects.get(codigo=cuponAux)
+                            print(cupon)                    
+                            if cupon.disponibilidad and cupon.fecha_expiracion >= timezone.now().date():
+                                subtotal = total
+                                total = cupon.aplicar_descuento(total)   
+                                cupon.disponibilidad = False
+                                cupon.save()                                         
+                            else:                        
+                                total = sum(item.total for item in items)
+                                for item in items:
+                                    platillo = item.platillo
+                                    cantidad = item.cantidad
+                                    total_puntos += platillo.precio_puntos * cantidad                            
+                                render_button = True
+                                messages.error(request, "El cupón no es válido o ha caducado.")                        
+                                return render(request, 'Cliente/registro_pedido.html', {
+                                    'platillos': platillos,
+                                    'carrito_items': carrito.items.all(),
+                                    'total': total,
+                                    'usuario': datos_usuario,
+                                    'render_button':render_button,
+                                    'total_puntos':total_puntos,
+                                    })                        
+                        except Cupon.DoesNotExist as e:                                                   
+                            total = sum(item.total for item in items)
+                            for item in items:
+                                platillo = item.platillo
+                                cantidad = item.cantidad
+                                total_puntos += platillo.precio_puntos * cantidad                            
+                                render_button = True
+                                messages.error(request, "El cupón no existe.")                        
+                                return render(request, 'Cliente/registro_pedido.html', {
+                                    'platillos': platillos,
+                                    'carrito_items': carrito.items.all(),
+                                    'total': total,
+                                    'usuario': datos_usuario,
+                                    'render_button':render_button,
+                                    'total_puntos':total_puntos,
+                                    })                    
+                    
+                # Verificar si el usuario desea pagar con puntos                 
                 if tipo_pago == 'puntos':
-                    if request.user.puntos.puntos_acumulados >= total_puntos:
-                        pedido.total = 0
-                        pedido.total_puntos = total_puntos
-                        request.user.puntos.puntos_acumulados -= total_puntos
-                        request.user.puntos.save()
+                    puntos_usuario = request.user.puntos  
+                    if puntos_usuario.son_validos():  
+                        if puntos_usuario.puntos_acumulados >= total_puntos:
+                               pedido.total = 0
+                               pedido.total_puntos = total_puntos
+                               puntos_usuario.puntos_acumulados -= total_puntos
+                               puntos_usuario.save()
+                               pedido.total = total  
+                               pedido.subtotal = total
+                               pedido.save()                                                
+                               messages.success(request, 'Registro exitoso. Pedido ID: #'+ str(pedido.id_pedido))  
+                               render_button=False         
+                               form_render=False   
+                               carrito = obtener_carrito(request) 
+                               carrito.items.all().delete()            
+                               return render (request,'Cliente/registro_pedido.html',{'render_button':render_button,'form_render':form_render})                                    
+                        else:
+                            render_button = True
+                            messages.warning(request, 'No tienes suficientes puntos para realizar la compra')
+                            return render(request, 'Cliente/registro_pedido.html', {
+                                    'platillos': platillos,
+                                    'carrito_items': carrito.items.all(),
+                                    'total': total,
+                                    'usuario': datos_usuario,
+                                    'render_button': render_button,
+                                    'total_puntos': total_puntos,
+                                    })
                     else:
-                        render_button = True
-                        messages.warning(request, 'No tienes suficientes puntos para realizar la compra')  
-                        return render(request, 'Cliente/registro_pedido.html', {
-                            'platillos': platillos,
-                            'carrito_items': carrito.items.all(),
-                            'total': total,
-                            'usuario': datos_usuario,
-                            'render_button':render_button,
-                            'total_puntos':total_puntos,
-                            })
+                         render_button = True
+                         messages.warning(request, 'Tus puntos han caducado o no están disponibles.')
+                         return render(request, 'Cliente/registro_pedido.html', {
+                              'platillos': platillos,
+                              'carrito_items': carrito.items.all(),
+                              'total': total,
+                              'usuario': datos_usuario,
+                              'render_button': render_button,
+                              'total_puntos': total_puntos,
+                              })
                 else:                    
                     if puntos_usuario:                 
                         puntos_usuario.puntos_acumulados += recompensa_puntos
@@ -678,7 +756,7 @@ def registro_pedido_cliente(request):
                         )
                            
                     pedido.total = total  # Si paga en efectivo o con tarjeta, total es el total calculado
-                    pedido.subtotal = total
+                    pedido.subtotal = subtotal
                     pedido.save()                                                
                     puntos_usuario.save()                                    
                     

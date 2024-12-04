@@ -25,6 +25,7 @@ urlpatterns = [
     path('crear_cupon/', crear_cupon, name='crear_cupon'),
     path('gestionar_regalias/', gestionar_regalias, name='gestionar_regalias'),
     path('consultar_menu/', consultar_menu, name='consultar_menu'),
+    path('consultar_menu_dia/', consultar_menu_dia, name='consultar_menu_dia'),
     path('carrito/', ver_carrito, name='ver_carrito'),
     path('agregar/<int:platillo_id>/    ', agregar_carrito, name='agregar_carrito'),
     path('realiza_pedido/', realizar_pedido, name='procesar_pago'),
