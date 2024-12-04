@@ -213,33 +213,36 @@ def perfil_cliente(request):
 def preparar_pedidos(request):
     if request.method == "POST":
         try:
-            # Obtener el ID del pedido desde el formulario
-            pedido_id = request.POST.get("pedido_id")
+            data = json.loads(request.body)
+            pedido_id = data.get("pedido_id")
 
-            # Validar que se proporcionó el ID
             if not pedido_id:
-                messages.error(request, "ID de pedido no proporcionado.")
-                return redirect("preparar_pedidos")
+                return JsonResponse({"success": False, "message": "ID de pedido no proporcionado."}, status=400)
 
-            # Obtener el pedido y el estado "Pendiente"
-            pedido = get_object_or_404(Pedido, id_pedido=pedido_id)
-            estado_pendiente = get_object_or_404(Estado, nombre="Pendiente")
+            pedido = Pedido.objects.filter(id_pedido=pedido_id).first()
+            if not pedido:
+                return JsonResponse({"success": False, "message": "Pedido no encontrado."}, status=404)
 
-            # Cambiar el estado del pedido
+            estado_pendiente = Estado.objects.filter(nombre="Pendiente").first()
+            if not estado_pendiente:
+                return JsonResponse({"success": False, "message": "Estado 'Pendiente' no encontrado."}, status=404)
+
             pedido.estado = estado_pendiente
             pedido.save()
 
-            # Mostrar mensaje de éxito
-            messages.success(request, f"El pedido {pedido_id} ha sido cambiado a estado Pendiente.")
+            return JsonResponse({"success": True, "message": f"Pedido {pedido_id} ahora está en estado Pendiente."}, status=200)
+        except json.JSONDecodeError:
+            return JsonResponse({"success": False, "message": "Solicitud inválida. JSON no decodificado."}, status=400)
         except Exception as e:
-            messages.error(request, f"Error al cambiar el estado del pedido: {str(e)}")
+            return JsonResponse({"success": False, "message": f"Error del servidor: {str(e)}"}, status=500)
 
-        # Redirigir a la misma página
-        return redirect("preparar_pedidos")
-
-    # Solicitudes GET: Mostrar los pedidos en estado "Preparando"
     pedidos_preparando = Pedido.objects.filter(estado__nombre="Preparando")
-    return render(request, "EncargadoDeDespacho/preparar_pedidos.html", {"pedidos_preparando": pedidos_preparando})
+    paginator = Paginator(pedidos_preparando, 6)  # Mostrar 7 pedidos por página
+
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    return render(request, "EncargadoDeDespacho/preparar_pedidos.html", {"page_obj": page_obj})
 
 # Vista para obtener detalles del pedido (JSON para el frontend)
 @login_required
