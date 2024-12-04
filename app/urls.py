@@ -33,5 +33,6 @@ urlpatterns = [
     path('eliminar/<int:platillo_id>/', eliminar_del_carrito, name='eliminar_del_carrito'),
     path('procesar_pago', registro_pedido_cliente, name='registro_pedido_cliente'),
     path('gestion_platillos/', gestionar_platillos, name='gestion_platillos'),
+    path('gestion_platillos/agregar/', agregar_platillo, name='agregar_platillo'),
     path('menu_dia/', menu_diario, name='menu_diario'),
 ]
