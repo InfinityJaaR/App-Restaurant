@@ -1,0 +1,68 @@
+{% extends 'nav.html' %}
+{% load static %}
+
+{% block head %}
+<title>Preparar Pedidos</title>
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto p-6">
+    <h1 class="text-3xl font-bold mb-6">Preparar Pedidos</h1>
+
+    {% if messages %}
+    <div class="mb-4">
+        {% for message in messages %}
+        <div class="bg-{{ message.tags }}-500 text-white font-bold p-4 rounded mb-2">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <table class="w-full table-auto border-collapse">
+        <thead>
+            <tr class="bg-gray-200 text-gray-700">
+                <th class="border px-4 py-2">ID Pedido</th>
+                <th class="border px-4 py-2">Cliente</th>
+                <th class="border px-4 py-2">Total</th>
+                <th class="border px-4 py-2">Estado</th>
+                <th class="border px-4 py-2">Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for pedido in pedidos_preparando %}
+            <tr class="border-b">
+                <td class="border px-4 py-2">{{ pedido.id_pedido }}</td>
+                <td class="border px-4 py-2">{{ pedido.get_cliente_nombre }}</td>
+                <td class="border px-4 py-2">${{ pedido.total }}</td>
+                <td class="border px-4 py-2">{{ pedido.estado.nombre }}</td>
+                <td class="border px-4 py-2">
+                    <button class="bg-blue-500 text-white py-2 px-4 rounded" onclick="verDetalles({{ pedido.id_pedido }})">Ver Detalles</button>
+                    <form method="post" class="inline-block">
+                        {% csrf_token %}
+                        <input type="hidden" name="pedido_id" value="{{ pedido.id_pedido }}">
+                        <button type="submit" class="bg-green-500 text-white py-2 px-4 rounded">Marcar como Pendiente</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div id="pedido-detalles" class="hidden mt-6 bg-white shadow-md rounded-lg p-6">
+        <h2 class="text-2xl font-bold mb-4">Detalles del Pedido</h2>
+        <table class="w-full table-auto border-collapse">
+            <thead>
+                <tr class="bg-gray-200 text-gray-700">
+                    <th class="border px-4 py-2">Platillo</th>
+                    <th class="border px-4 py-2">Cantidad</th>
+                    <th class="border px-4 py-2">Subtotal</th>
+                </tr>
+            </thead>
+            <tbody id="detalles-list"></tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'js/preparar_pedidos.js' %}"></script>
+{% endblock %}
