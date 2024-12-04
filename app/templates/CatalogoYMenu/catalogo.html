@@ -1,0 +1,57 @@
+{% extends 'nav.html' %}
+{% load static %}
+
+{% block head %}
+<title>Gestionar Catálogo</title>
+<link rel="stylesheet" href="{% static 'css/catalogo.css' %}">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="content-wrapper">
+        <div class="titulo">
+            <h1>Catálogo del menú</h1>
+        </div>
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+            <div class="message {{ message.tags }}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="textbar-container">
+            <div class="textbar-text">
+                <h2>Platillos</h2>
+            </div>
+            <div class="textbar-addbtn">
+                <a href="#">Agregar Platillo</a>
+            </div>
+        </div>
+
+        <div class="catalogo">
+            <div class="row">
+                {% for platillo in platillos %}
+                <div class="col-4">
+                    <div class="card">
+                        <img src="{{ platillo.imagen.url }}" alt="{{ platillo.nombre }}">
+                        <div class="card-body">
+                            <h2>{{ platillo.nombre }}</h2>
+                            <button class="btn-edit">Editar</button>
+                            <button class="btn-delete">Eliminar</button>
+                        </div>
+                    </div>
+                </div>
+                {% if forloop.counter|divisibleby:3 and not forloop.last %}
+            </div>
+            <div class="row">
+                {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

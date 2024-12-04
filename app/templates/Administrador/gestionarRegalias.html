@@ -1,0 +1,156 @@
+{% extends 'nav.html' %}
+{% load static %}
+
+{% block head %}
+    <title>Gestión de Puntos y Cupones</title>
+    <link rel="stylesheet" href="{% static 'css/gestionarRegalias.css' %}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="page-container p-6">
+    <div class="content-wrapper bg-white p-6 shadow-md rounded-lg">
+        <div class="titulo text-center mb-6">
+            <h1 class="text-3xl font-bold">Gestión de Puntos y Cupones</h1>
+        </div>
+        
+        {% if messages %}
+        <div class="messages mb-4">
+            {% for message in messages %}
+            <div class="message {{ message.tags }} p-4 mb-2 border rounded-md">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Gestión de Puntos -->
+        <div class="section mb-8">
+            <h2 class="text-2xl font-semibold mb-4">Gestión de Puntos</h2>
+            <div class="header flex gap-4">
+                <form action="{% url 'desactivar_puntos' %}" method="POST" class="inline-block">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-action bg-red-500 text-white px-4 py-2 rounded-md shadow-sm transform transition duration-200 hover:bg-red-600 hover:shadow-md">
+                        <i class="fa-solid fa-ban"></i> Desactivar Todos
+                    </button>
+                </form>
+                <form action="{% url 'reactivar_puntos' %}" method="POST" class="inline-block">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-action bg-green-500 text-white px-4 py-2 rounded-md shadow-sm transform transition duration-200 hover:bg-green-600 hover:shadow-md">
+                        <i class="fa-solid fa-check"></i> Reactivar Válidos
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Gestión de Cupones -->
+        <div class="section mb-8">
+            <h2 class="text-2xl font-semibold mb-4">Gestión de Cupones</h2>
+            <div class="header flex gap-4 mb-6">
+                <form action="{% url 'desactivar_cupones' %}" method="POST" class="inline-block">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-action bg-red-500 text-white px-4 py-2 rounded-md shadow-sm transform transition duration-200 hover:bg-red-600 hover:shadow-md">
+                        <i class="fa-solid fa-ban"></i> Desactivar Todos
+                    </button>
+                </form>
+                <form action="{% url 'reactivar_cupones' %}" method="POST" class="inline-block">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-action bg-green-500 text-white px-4 py-2 rounded-md shadow-sm transform transition duration-200 hover:bg-green-600 hover:shadow-md">
+                        <i class="fa-solid fa-check"></i> Reactivar Válidos
+                    </button>
+                </form>
+                <button onclick="openModal()" class="btn-action bg-blue-500 text-white px-4 py-2 rounded-md shadow-sm transform transition duration-200 hover:bg-blue-600 hover:shadow-md">
+                    <i class="fa-solid fa-plus"></i> Crear Nuevo Cupón
+                </button>
+            </div>
+        </div>
+
+        <!-- Cupones Disponibles -->
+        <div class="section mb-8">
+            <h2 class="text-2xl font-semibold mb-4">Cupones Disponibles</h2>
+            <div class="overflow-x-auto">
+                <table class="table-auto w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-gray-200">
+                            <th class="p-4 border">Código</th>
+                            <th class="p-4 border">Descuento</th>
+                            <th class="p-4 border">Fecha Expiración</th>
+                            <th class="p-4 border">Disponibilidad</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for cupon in cupones %}
+                        <tr>
+                            <td class="p-4 border">{{ cupon.codigo }}</td>
+                            <td class="p-4 border">{{ cupon.descuento }}</td>
+                            <td class="p-4 border">{{ cupon.fecha_expiracion }}</td>
+                            <td class="p-4 border">{{ cupon.disponibilidad|yesno:"Disponible,No disponible" }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Paginación -->
+        <div class="pagination mt-6">
+            <div class="flex justify-center">
+                {% if cupones.has_previous %}
+                    <a href="?page={{ cupones.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" 
+                       class="px-4 py-2 bg-gray-300 rounded-md mr-2 hover:bg-gray-400">
+                       Anterior
+                    </a>
+                {% endif %}
+                
+                <span class="px-4 py-2">{{ cupones.number }} de {{ cupones.paginator.num_pages }}</span>
+                
+                {% if cupones.has_next %}
+                    <a href="?page={{ cupones.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" 
+                       class="px-4 py-2 bg-gray-300 rounded-md ml-2 hover:bg-gray-400">
+                       Siguiente
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Crear Nuevo Cupón -->
+<div id="modal" class="fixed z-10 inset-0 overflow-y-auto hidden">
+    <div class="flex items-center justify-center min-h-screen">
+        <div class="bg-white p-8 rounded-lg shadow-lg max-w-md w-full">
+            <h2 class="text-xl font-bold mb-6">Crear Nuevo Cupón</h2>
+            <form action="{% url 'crear_cupon' %}" method="POST">
+                {% csrf_token %}
+                <div class="mb-4">
+                    <label for="codigo" class="block text-sm font-medium mb-2">Código:</label>
+                    <input type="text" name="codigo" id="codigo" class="w-full border border-gray-300 px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                </div>
+                <div class="mb-4">
+                    <label for="descuento" class="block text-sm font-medium mb-2">Descuento:</label>
+                    <input type="number" step="0.01" name="descuento" id="descuento" class="w-full border border-gray-300 px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                </div>
+                <div class="mb-4">
+                    <label for="fecha_expiracion" class="block text-sm font-medium mb-2">Fecha Expiración:</label>
+                    <input type="date" name="fecha_expiracion" id="fecha_expiracion" class="w-full border border-gray-300 px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                </div>
+                <div class="flex justify-end gap-4">
+                    <button type="button" onclick="closeModal()" class="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600">Cancelar</button>
+                    <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">Crear</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openModal() {
+        document.getElementById('modal').classList.remove('hidden');
+    }
+
+    function closeModal() {
+        document.getElementById('modal').classList.add('hidden');
+    }
+</script>
+{% endblock %}

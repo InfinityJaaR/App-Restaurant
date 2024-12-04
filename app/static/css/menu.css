@@ -1,0 +1,19 @@
+img.w-full.h-50.object-cover.mb-4 {
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+}
+
+ .swiper-wrapper {
+    width: 100%;
+    height: max-content !important;
+    padding-bottom: 64px !important;
+    -webkit-transition-timing-function: linear !important;
+    transition-timing-function: linear !important;
+    position: relative;
+  }
+  .swiper-pagination-bullet {
+    background: #0d0c2b;
+  }
+  .swiper-pagination-bullet-active {
+    background: #0d0c2b !important;
+  }

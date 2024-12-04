@@ -46,12 +46,12 @@
             <li><a href="{% url 'gestionarUsuario' %}" class="nav-item">
                 <i class="fas fa-users"></i> Usuarios
             </a></li>
-            <li><a href="/descuentos" class="nav-item">
+            <li><a href="{% url 'gestionar_regalias' %}" class="nav-item">
                 <i class="fas fa-percent"></i> Descuentos
             </a></li>
             {% endif %}
             {% if user.groups.all.0.name == 'Encargado de Menu' %}
-            <li><a href="/menu" class="nav-item">
+            <li><a href="{% url 'menu_diario' %}" class="nav-item">
                 <i class="fas fa-utensils"></i> Menú
             </a></li>
             <li><a href="/reservas" class="nav-item">
