@@ -2,47 +2,73 @@
 {% load static %}
 
 {% block head %}
-    <title>Agregar Platillo</title>
-    <link rel="stylesheet" href="{% static 'css/AgregarPlatillo.css' %}">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+<title>Agregar Platillo</title>
+<link rel="stylesheet" href="{% static 'css/agregarPlatillo.css' %}">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 {% endblock %}
 
 {% block content %}
-    <div id="modal" class="modal">
-        <div class="modal-content">
-            <span class="close-btn">&times;</span>
-            <h2>Nuevo Platillo</h2>
-            <p>Contenido del modal...</p>
+<div class="page-container">
+    <div class="content-wrapper">
+        <a class="btn-back" href="{% url 'gestion_platillos' %}"><i class=" fa fa-arrow-left"
+                style="margin-right: 0.5rem;"></i>Regresar</a>
+        <div class="title">Agregar Platillo</div>
+
+        <div class="form-container">
+            <div class="container1">
+                <form action="{% url 'agregar_platillo' %}" method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="nombre" class="labels">Nombre:</label>
+                        <input type="text" name="nombre" id="nombre" required class="input">
+                    </div>
+                    <div class="form-group">
+                        <label for="descripcion" class="labels">Descripción:</label>
+                        <textarea name="descripcion" id="descripcion" required class="input"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="precio" class="labels">Precio:</label>
+                        <input type="number" name="precio" id="precio" required class="input" step="0.01"
+                            style="width: min-content;">
+                    </div>
+                    <div class="form-group">
+                        <label for="precio_puntos" class="labels">Precio en puntos:</label>
+                        <input type="number" name="precio_puntos" id="precio_puntos" step="1" required class="input"
+                            style="width: min-content;">
+                    </div>
+            </div>
+
+            <div class="container2">
+                <div class="form-group">
+                    <label for="recompensa_puntos" class="labels2">Recompensa en puntos:</label>
+                    <input type="number" name="recompensa_puntos" id="recompensa_puntos" step="1" required
+                        class="input2" style="width: min-content;">
+                </div>
+                <div class="form-group">
+                    <label for="platillo_dia" class="labels2">¿Platillo del día?</label>
+                    <select name="platillo_dia" id="platillo_dia" class="selection" required style="width: 20%;">
+                        <option value="1">Sí</option>
+                        <option value="0">No</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="cantidad_maxima" class="labels2">Cantidad máxima:</label>
+                    <input type="number" name="cantidad_maxima" id="cantidad_maxima" step="1" required class="input2"
+                        style="width: min-content;">
+                </div>
+                <div class="form-group">
+                    <label for="imagen" class="labels2">Imagen (URL):</label>
+                    <input type="url" name="imagen" id="imagen" required class="input2" pattern="https?://.+" title="Por favor ingrese una URL válida" style="width: 100%;">
+                </div>
+
+                <div class="form-group" style="margin-top: 4rem; margin-left: 12rem;">
+                    <button type="submit" class="btn-submit">Guardar</button>
+                    <a class="btn-cancel" href="{% url 'gestion_platillos' %}">Cancelar</a>
+                </div>
+            </div>
+
         </div>
     </div>
-{% endblock %}
-
-{% block scripts %}
-<script>
-    // Obtener el modal
-    var modal = document.getElementById("modal");
-
-    // Obtener el botón que abre el modal
-    var btn = document.getElementById("myBtn");
-
-    // Obtener el elemento <span> que cierra el modal
-    var span = document.getElementsByClassName("close-btn")[0];
-
-    // Cuando el usuario hace clic en el botón, abre el modal
-    btn.onclick = function() {
-        modal.style.display = "block";
-    }
-
-    // Cuando el usuario hace clic en <span> (x), cierra el modal
-    span.onclick = function() {
-        modal.style.display = "none";
-    }
-
-    // Cuando el usuario hace clic en cualquier lugar fuera del modal, cierra el modal
-    window.onclick = function(event) {
-        if (event.target == modal) {
-            modal.style.display = "none";
-        }
-    }
-</script>
+</div>
 {% endblock %}
