@@ -1,0 +1,91 @@
+
+{% extends 'nav.html' %} 
+{% load static %} 
+{% block head %}
+    <title>Menu - Queiques</title>
+    <link href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"  rel="stylesheet"/>
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <link  href="{% static 'css/menu.css' %}" rel="stylesheet"></link>
+{% endblock %} 
+{% block content %}
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div class="message {{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    <div class="container mx-auto p-6">
+        <div class="flex space-x-4 mt-4">
+            <a
+            href="{% url 'ver_carrito' %}"
+            class="bg-black text-white px-4 py-2 rounded mb-4"
+            >
+            <i class="fas fa-shopping-cart mr-4"></i> Carrito de compras</a
+            >
+        </div>
+        <h1 class="text-3xl font-bold text-center mb-6">Platillos del Dia</h1>
+        <div class="w-full relative">
+            <div class="swiper centered-slide-carousel swiper-container relative">
+                <div class="swiper-wrapper">
+                    {% for platillo in platillos_dia %}
+                    <div class="swiper-slide">
+                        <div
+                        class="bg-white rounded-2xl h-96 flex flex-col justify-center items-center shadow-md rounded-lg overflow-hidden"
+                        >            
+                        <img
+                        src="{{ platillo.imagen.url }}"
+                        alt="{{ platillo.nombre }}"
+                        class="w-full h-50 object-cover mb-4"
+                        />
+                        <h3 class="text-xl font-semibold">{{ platillo.nombre }}</h3>
+                        <p class="text-sm text-gray-600 text-center">
+                            {{ platillo.descripcion }}
+                        </p>
+                        <p class="text-lg font-semibold text-gray-900 mt-2">
+                            $ {{ platillo.precio }}
+                        </p>
+                        <p class="text-sm text-gray-500">
+                            Puntos: {{ platillo.precio_puntos }}
+                        </p>
+                        <form
+                        action="{% url 'agregar_carrito' platillo.id_platillo %}"
+                        method="POST"
+                        >
+                        {% csrf_token %}
+                        <input type="number" name="cantidad" value="1" min="1" class="w-16 mr-2 border rounded px-2 py-1" required/>
+                        <button type="submit" class="bg-black text-white px-4 py-2 rounded hover:bg-blue-600" > <i class="fas fa-shopping-cart mr-4"></i> Agregar </button>
+                    </form>            
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+         <div class="swiper-pagination"></div>
+        </div>
+    </div>
+    
+    <h1 class="text-3xl font-bold text-center mt-3 mb-6">Menú de Platillos</h1>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {% for platillo in platillos %}
+        <div class="bg-white shadow-md rounded-lg overflow-hidden">
+            <img class="w-full h-48 object-cover" src="{{ platillo.imagen.url }}" alt="{{ platillo.nombre }}"/>
+            <div class="p-4">
+                <h2 class="text-xl font-semibold">{{ platillo.nombre }}</h2>
+                <p class="text-gray-600 text-sm mt-2">{{ platillo.descripcion }}</p>
+                <p class="text-gray-800 font-bold mt-4">
+                    Precio: ${{ platillo.precio }}
+                </p>
+                <p class="text-gray-600">Puntos: {{ platillo.precio_puntos }}</p>
+                <form action="{% url 'agregar_carrito' platillo.id_platillo %}" method="POST">
+                    {% csrf_token %}
+                    <input type="number" name="cantidad" value="1" min="1" class="w-16 border rounded px-2 py-1  mr-4" required/>
+                    <button type="submit" class="bg-black text-white px-4 py-2 rounded hover:bg-blue-600 "><i class="fas fa-shopping-cart mr-4"></i> Agregar</button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+<script src="{% static 'js/menu.js' %}"></script>
+
+{% endblock %}
