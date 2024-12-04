@@ -8,8 +8,7 @@ from django.contrib import messages
 from django.contrib.auth import logout
 from django.core.paginator import Paginator
 from django.utils import timezone
-from django.urls import path
-from .models import Cupon, Puntos, MasCampos
+from django.http import JsonResponse
 import json
 
 # Create your views here.
@@ -244,17 +243,24 @@ def gestion_pedidos(request):
     }
     return render(request, 'EncargadoDeDespacho/gestion_pedidos.html', context)
 
+@login_required
+@csrf_exempt
 def registro_pedidos_no_registrados(request):
     if request.method == 'POST':
         try:
             # Extraer los datos del cliente desde la solicitud POST
-            cliente_data = json.loads(request.body)
-            nombre = cliente_data.get('nombre')
-            telefono = cliente_data.get('telefono')
-            ubicacion = cliente_data.get('ubicacion')
-            correo = cliente_data.get('correo')
-            
-            # Crear un nuevo cliente no registrado
+            data = json.loads(request.body)
+            nombre = data.get('nombre')
+            telefono = data.get('telefono')
+            ubicacion = data.get('ubicacion')
+            correo = data.get('correo')
+            tipo_pago = data.get('tipo_pago')
+            platillos_data = data.get('platillos', [])
+
+            if not platillos_data:
+                return JsonResponse({'error': 'No se han seleccionado platillos'}, status=400)
+
+            # Crear un cliente no registrado
             cliente_no_registrado = ClienteNoRegistrado.objects.create(
                 nombre=nombre,
                 telefono=telefono,
@@ -262,52 +268,57 @@ def registro_pedidos_no_registrados(request):
                 correo=correo
             )
 
-            # Extraer los datos del pedido
-            platillos_data = cliente_data.get('platillos', [])
-            total = 0
-            subtotal = 0
-
             # Crear el pedido
+            subtotal = 0
             pedido = Pedido.objects.create(
                 cliente_no_registrado=cliente_no_registrado,
                 fecha=timezone.now(),
-                total=0,  # El total se actualizará más adelante
-                subtotal=0,  # El subtotal se actualizará más adelante
-                tipo_pago='efectivo',
+                subtotal=0,
+                total=0,
+                tipo_pago=tipo_pago,
                 total_puntos=0,
-                estado=Estado.objects.get(nombre='Pendiente')
+                estado=Estado.objects.get(nombre='Preparando')
             )
 
-            # Crear las líneas de pedido
-            for platillo_data in platillos_data:
-                platillo_id = platillo_data.get('id')
-                cantidad = platillo_data.get('cantidad', 1)
-                
+            # Crear líneas de pedido y actualizar disponibilidad
+            for item in platillos_data:
+                platillo_id = item.get('id')
+                cantidad = int(item.get('cantidad', 1))
                 platillo = Platillo.objects.get(id_platillo=platillo_id)
+
+                if cantidad > platillo.cantidad_maxima:
+                    return JsonResponse({'error': f'No hay suficiente disponibilidad para el platillo {platillo.nombre}. Disponible: {platillo.cantidad_maxima}'}, status=400)
+
+                # Actualizar cantidad máxima
+                platillo.cantidad_maxima -= cantidad
+                platillo.save()
+
+                # Calcular subtotal
                 subtotal_orden = platillo.precio * cantidad
-                total += subtotal_orden
-                
+                subtotal += subtotal_orden
+
+                # Crear línea de pedido
                 LineaPedidos.objects.create(
                     pedido=pedido,
                     platillo=platillo,
                     cantidad=cantidad,
                     total_orden=subtotal_orden,
-                    valor_puntos=0  # No se consideran puntos para clientes no registrados
+                    valor_puntos=0
                 )
 
-            # Actualizar el total y el subtotal del pedido
-            pedido.total = total
-            pedido.subtotal = total
+            # Actualizar subtotal del pedido
+            pedido.subtotal = subtotal
             pedido.save()
 
-            return HttpResponse(status=201)
-        except ValidationError as e:
-            return HttpResponse(json.dumps({'error': str(e)}), status=400, content_type='application/json')
-        except Exception as e:
-            return HttpResponse(json.dumps({'error': 'Error al registrar el pedido.'}), status=500, content_type='application/json')
+            return JsonResponse({'message': 'Pedido registrado exitosamente', 'pedido_id': pedido.id_pedido}, status=201)
 
-    # Renderizar la plantilla de registro de pedidos
-    platillos = Platillo.objects.all()
+        except Platillo.DoesNotExist:
+            return JsonResponse({'error': 'Platillo no encontrado'}, status=404)
+        except Exception as e:
+            return JsonResponse({'error': 'Error al registrar el pedido', 'details': str(e)}, status=500)
+
+    # Renderizar la plantilla con los platillos del día
+    platillos = Platillo.objects.filter(platillo_dia=True)
     context = {
         'platillos': platillos
     }

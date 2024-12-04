@@ -1,56 +1,50 @@
 document.addEventListener('DOMContentLoaded', function () {
-    const platillosList = document.getElementById('platillos-list');
     const resumenPedidoList = document.getElementById('resumen-pedido-list');
     const pedidoTotalElement = document.getElementById('pedido-total');
+    const jsMessages = document.getElementById('js-messages');
     let pedido = [];
 
-    // Mock data para platillos (reemplazar con una llamada AJAX al servidor para obtener los platillos reales)
-    const platillos = [
-        { id: 1, nombre: 'Platillo 1', precio: 5.0 },
-        { id: 2, nombre: 'Platillo 2', precio: 7.5 },
-        { id: 3, nombre: 'Platillo 3', precio: 10.0 },
-    ];
+    function mostrarMensajeJS(tipo, mensaje) {
+        jsMessages.innerHTML = `<div class="bg-${tipo}-500 text-white font-bold p-4 rounded mb-4">${mensaje}</div>`;
+        setTimeout(() => (jsMessages.innerHTML = ''), 3000);
+    }
 
-    // Renderizar lista de platillos
-    platillos.forEach(platillo => {
-        const row = document.createElement('tr');
-        row.classList.add('border-b');
-        row.innerHTML = `
-            <td class="border px-4 py-2">${platillo.nombre}</td>
-            <td class="border px-4 py-2">$${platillo.precio.toFixed(2)}</td>
-            <td class="border px-4 py-2">
-                <input type="number" id="cantidad-${platillo.id}" class="w-full border rounded p-2" min="1" value="1">
-            </td>
-            <td class="border px-4 py-2">
-                <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onclick="agregarPlatillo(${platillo.id})">Agregar</button>
-            </td>
-        `;
-        platillosList.appendChild(row);
-    });
-
-    // Función para agregar un platillo al pedido
     window.agregarPlatillo = function (platilloId) {
-        const platillo = platillos.find(p => p.id === platilloId);
         const cantidadInput = document.getElementById(`cantidad-${platilloId}`);
+        const disponibleElement = document.getElementById(`disponible-${platilloId}`);
+        const cantidadDisponible = parseInt(disponibleElement.innerText);
         const cantidad = parseInt(cantidadInput.value);
 
-        if (cantidad > 0) {
-            const existente = pedido.find(p => p.id === platilloId);
-            if (existente) {
-                existente.cantidad += cantidad;
-            } else {
-                pedido.push({ ...platillo, cantidad });
-            }
-            actualizarResumenPedido();
+        if (cantidad > cantidadDisponible || cantidad <= 0) {
+            Swal.fire({
+                title: 'Cantidad no válida',
+                text: `Por favor, elija un valor entre 1 y ${cantidadDisponible}.`,
+                icon: 'warning',
+                confirmButtonText: 'Aceptar'
+            });
+            return;
         }
+
+        const nombrePlatillo = document.querySelector(`#platillo-row-${platilloId} td:nth-child(1)`).innerText;
+        const precioPlatillo = parseFloat(document.querySelector(`#platillo-row-${platilloId} td:nth-child(2)`).innerText.replace('$', '').trim());
+
+        disponibleElement.innerText = cantidadDisponible - cantidad;
+
+        const existente = pedido.find(p => p.id === platilloId);
+        if (existente) {
+            existente.cantidad += cantidad;
+        } else {
+            pedido.push({ id: platilloId, nombre: nombrePlatillo, precio: precioPlatillo, cantidad });
+        }
+
+        actualizarResumenPedido();
     };
 
-    // Función para actualizar el resumen del pedido
     function actualizarResumenPedido() {
         resumenPedidoList.innerHTML = '';
         let total = 0;
 
-        pedido.forEach(item => {
+        pedido.forEach((item, index) => {
             const subtotal = item.precio * item.cantidad;
             total += subtotal;
 
@@ -58,43 +52,148 @@ document.addEventListener('DOMContentLoaded', function () {
             row.classList.add('border-b');
             row.innerHTML = `
                 <td class="border px-4 py-2">${item.nombre}</td>
-                <td class="border px-4 py-2">${item.cantidad}</td>
+                <td class="border px-4 py-2">
+                    <button class="bg-gray-300 hover:bg-gray-500 text-black font-bold px-2 rounded disminuir" data-index="${index}">-</button>
+                    ${item.cantidad}
+                    <button class="bg-gray-300 hover:bg-gray-500 text-black font-bold px-2 rounded aumentar" data-index="${index}">+</button>
+                </td>
                 <td class="border px-4 py-2">$${subtotal.toFixed(2)}</td>
+                <td class="border px-4 py-2">
+                    <button class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded eliminar" data-index="${index}">Eliminar</button>
+                </td>
             `;
             resumenPedidoList.appendChild(row);
         });
 
         pedidoTotalElement.textContent = total.toFixed(2);
+
+        document.querySelectorAll('.disminuir').forEach(button => {
+            button.addEventListener('click', function () {
+                disminuirCantidad(parseInt(this.dataset.index));
+            });
+        });
+
+        document.querySelectorAll('.aumentar').forEach(button => {
+            button.addEventListener('click', function () {
+                aumentarCantidad(parseInt(this.dataset.index));
+            });
+        });
+
+        document.querySelectorAll('.eliminar').forEach(button => {
+            button.addEventListener('click', function () {
+                eliminarPlatillo(parseInt(this.dataset.index));
+            });
+        });
     }
 
-    // Evento para guardar el pedido
-    document.getElementById('guardar-pedido').addEventListener('click', function () {
-        const clienteForm = document.getElementById('cliente-form');
-        const formData = new FormData(clienteForm);
-        const cliente = {
-            nombre: formData.get('nombre'),
-            telefono: formData.get('telefono'),
-            ubicacion: formData.get('ubicacion'),
-            correo: formData.get('correo')
-        };
+    function disminuirCantidad(index) {
+        const item = pedido[index];
+        if (item.cantidad > 1) {
+            item.cantidad--;
+            const disponibleElement = document.getElementById(`disponible-${item.id}`);
+            disponibleElement.innerText = parseInt(disponibleElement.innerText) + 1;
+            actualizarResumenPedido();
+        }
+    }
 
-        if (cliente.nombre && cliente.telefono && cliente.ubicacion) {
-            // Mock guardar pedido (reemplazar con una llamada AJAX para guardar en la base de datos)
-            console.log('Cliente:', cliente);
-            console.log('Pedido:', pedido);
-            Swal.fire({
-                title: 'Pedido Guardado',
-                text: 'Pedido guardado exitosamente.',
-                icon: 'success',
-                confirmButtonText: 'Aceptar'
-            });
+    function aumentarCantidad(index) {
+        const item = pedido[index];
+        const disponibleElement = document.getElementById(`disponible-${item.id}`);
+        const cantidadDisponible = parseInt(disponibleElement.innerText);
+
+        if (cantidadDisponible > 0) {
+            item.cantidad++;
+            disponibleElement.innerText = cantidadDisponible - 1;
+            actualizarResumenPedido();
         } else {
             Swal.fire({
-                title: 'Campos Incompletos',
-                text: 'Por favor complete todos los campos del cliente.',
+                title: 'Cantidad no disponible',
+                text: 'No hay más unidades disponibles.',
                 icon: 'warning',
                 confirmButtonText: 'Aceptar'
             });
         }
+    }
+
+    function eliminarPlatillo(index) {
+        const item = pedido[index];
+        const disponibleElement = document.getElementById(`disponible-${item.id}`);
+        disponibleElement.innerText = parseInt(disponibleElement.innerText) + item.cantidad;
+
+        pedido.splice(index, 1);
+        actualizarResumenPedido();
+    }
+
+    document.getElementById('guardar-pedido').addEventListener('click', function () {
+        const nombre = document.getElementById('nombre').value;
+        const telefono = document.getElementById('telefono').value;
+        const ubicacion = document.getElementById('ubicacion').value;
+        const correo = document.getElementById('correo').value;
+        const tipo_pago = document.getElementById('tipo_pago').value;
+
+        if (!nombre || !telefono || !ubicacion) {
+            mostrarMensajeJS('red', 'Por favor complete todos los campos del cliente.');
+            return;
+        }
+
+        if (pedido.length === 0) {
+            mostrarMensajeJS('red', 'Por favor agregue al menos un platillo al pedido.');
+            return;
+        }
+
+        fetch('/app/registro_pedidos_no_registrados/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({
+                nombre,
+                telefono,
+                ubicacion,
+                correo,
+                tipo_pago,
+                platillos: pedido.map(item => ({ id: item.id, cantidad: item.cantidad }))
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message) {
+                Swal.fire('Éxito', data.message, 'success');
+                document.getElementById('cliente-form').reset();
+                resumenPedidoList.innerHTML = '';
+                pedidoTotalElement.textContent = '0.00';
+                pedido = [];
+                document.querySelectorAll('[id^="disponible-"]').forEach(element => {
+                    const originalCantidad = element.getAttribute('data-original-cantidad');
+                    element.innerText = originalCantidad;
+                });
+            } else {
+                Swal.fire('Error', data.error, 'error');
+            }
+        })
+        .catch(error => {
+            mostrarMensajeJS('red', 'Error al registrar el pedido. Intente nuevamente.');
+            console.error('Error:', error);
+        });
+    });
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let cookie of cookies) {
+                cookie = cookie.trim();
+                if (cookie.startsWith(name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    document.querySelectorAll('[id^="disponible-"]').forEach(element => {
+        element.setAttribute('data-original-cantidad', element.innerText);
     });
 });
