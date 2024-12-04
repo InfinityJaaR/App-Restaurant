@@ -28,7 +28,7 @@
                 <h2>Platillos</h2>
             </div>
             <div class="textbar-addbtn">
-                <a href="#">Agregar Platillo</a>
+                <a href="{% url 'agregar_platillo' %}" class="textbar-addbtn">Agregar Platillo</a>
             </div>
         </div>
 
@@ -36,7 +36,7 @@
             <div class="row">
                 {% for platillo in platillos %}
                 <div class="col-4">
-                    <div class="card">
+                   <div class="card">
                         <img src="{{ platillo.imagen.url }}" alt="{{ platillo.nombre }}">
                         <div class="card-body">
                             <h2>{{ platillo.nombre }}</h2>
