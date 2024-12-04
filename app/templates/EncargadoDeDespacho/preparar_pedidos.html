@@ -11,15 +11,7 @@
     <h1 class="text-3xl font-bold mb-6 text-center">Preparar Pedidos</h1>
 
     <!-- Mensajes del servidor -->
-    <div id="server-messages" class="space-y-4">
-      {% if messages %}
-        {% for message in messages %}
-          <div class="p-4 rounded-lg shadow-md bg-green-200 border-l-4 border-green-500 text-green-800 mb-4">
-            {{ message }}
-          </div>
-        {% endfor %}
-      {% endif %}
-    </div>
+    <div id="server-messages" class="space-y-4"></div>
 
     <!-- Tabla de pedidos -->
     <div class="overflow-x-auto">
@@ -36,7 +28,7 @@
         </thead>
         <tbody>
           {% for pedido in page_obj %}
-            <tr class="border-b">
+            <tr class="border-b" data-pedido-id="{{ pedido.id_pedido }}">
               <td class="border px-4 py-2 whitespace-nowrap">{{ pedido.id_pedido }}</td>
               <td class="border px-4 py-2 whitespace-nowrap">
                 {{ pedido.usuario.first_name }} {{ pedido.usuario.last_name }}
@@ -50,7 +42,7 @@
                 </a>
               </td>
               <td class="border px-4 py-2 text-center whitespace-nowrap">
-                <form method="POST" action="{% url 'preparar_pedidos' %}">
+                <form method="POST" action="{% url 'preparar_pedidos' %}" class="form-marcar-pendiente">
                   {% csrf_token %}
                   <input type="hidden" name="pedido_id" value="{{ pedido.id_pedido }}">
                   <button type="submit" class="bg-green-500 hover:bg-green-700 text-white py-2 px-4 rounded w-30 text-center">
@@ -101,5 +93,5 @@
 {% endblock %}
 
 {% block scripts %}
-  <script src="{% static 'js/registro_pedidos.js' %}"></script>
+  <script src="{% static 'js/preparar_pedidos.js' %}"></script>
 {% endblock %}

@@ -212,34 +212,28 @@ def perfil_cliente(request):
 @login_required
 def preparar_pedidos(request):
     if request.method == "POST":
-        try:
-            data = json.loads(request.body)
-            pedido_id = data.get("pedido_id")
+        # Procesar el formulario enviado por el método POST
+        pedido_id = request.POST.get("pedido_id")
+        if not pedido_id:
+            return JsonResponse({"success": False, "message": "ID de pedido no proporcionado."}, status=400)
 
-            if not pedido_id:
-                return JsonResponse({"success": False, "message": "ID de pedido no proporcionado."}, status=400)
+        pedido = get_object_or_404(Pedido, id_pedido=pedido_id)
 
-            pedido = Pedido.objects.filter(id_pedido=pedido_id).first()
-            if not pedido:
-                return JsonResponse({"success": False, "message": "Pedido no encontrado."}, status=404)
+        # Verificar que el estado "Pendiente" exista
+        estado_pendiente = Estado.objects.filter(nombre="Pendiente").first()
+        if not estado_pendiente:
+            return JsonResponse({"success": False, "message": "Estado 'Pendiente' no encontrado."}, status=404)
 
-            estado_pendiente = Estado.objects.filter(nombre="Pendiente").first()
-            if not estado_pendiente:
-                return JsonResponse({"success": False, "message": "Estado 'Pendiente' no encontrado."}, status=404)
+        # Actualizar el estado del pedido
+        pedido.estado = estado_pendiente
+        pedido.save()
 
-            pedido.estado = estado_pendiente
-            pedido.save()
+        return JsonResponse({"success": True, "message": f"Pedido {pedido_id} ahora está en estado Pendiente."}, status=200)
 
-            return JsonResponse({"success": True, "message": f"Pedido {pedido_id} ahora está en estado Pendiente."}, status=200)
-        except json.JSONDecodeError:
-            return JsonResponse({"success": False, "message": "Solicitud inválida. JSON no decodificado."}, status=400)
-        except Exception as e:
-            return JsonResponse({"success": False, "message": f"Error del servidor: {str(e)}"}, status=500)
-
+    # Mostrar la tabla con la paginación
     pedidos_preparando = Pedido.objects.filter(estado__nombre="Preparando")
-    paginator = Paginator(pedidos_preparando, 6)  # Mostrar 7 pedidos por página
-
-    page_number = request.GET.get('page')
+    paginator = Paginator(pedidos_preparando, 6)  # Mostrar 6 pedidos por página
+    page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
 
     return render(request, "EncargadoDeDespacho/preparar_pedidos.html", {"page_obj": page_obj})
