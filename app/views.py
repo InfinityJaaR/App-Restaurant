@@ -285,7 +285,7 @@ def asignar_pedidos(request):
     }
     return render(request, "EncargadoDeDespacho/asignar_pedidos.html", context)
 
-#crear vista para el encargado de pedidos
+# Crear vista para el encargado de pedidos
 @login_required
 @csrf_exempt
 def registro_pedidos_no_registrados(request):
@@ -349,8 +349,9 @@ def registro_pedidos_no_registrados(request):
                     valor_puntos=0
                 )
 
-            # Actualizar subtotal del pedido
+            # Actualizar subtotal y total del pedido
             pedido.subtotal = subtotal
+            pedido.total = subtotal
             pedido.save()
 
             return JsonResponse({'message': 'Pedido registrado exitosamente', 'pedido_id': pedido.id_pedido}, status=201)
