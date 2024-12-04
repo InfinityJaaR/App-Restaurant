@@ -259,6 +259,12 @@ def asignar_pedidos(request):
     repartidores_disponibles = User.objects.filter(
         groups__name="Repartidor", mascampos__is_active=True
     )
+
+    # Paginación para pedidos pendientes
+    pedidos_paginator = Paginator(pedidos_pendientes, 3)  # Mostrar 3 pedidos por página
+    pedidos_page_number = request.GET.get('pedidos_page')
+    pedidos_page_obj = pedidos_paginator.get_page(pedidos_page_number)
+
     if request.method == "POST":
         pedido_id = request.POST.get("pedido_id")
         pedido = Pedido.objects.get(id_pedido=pedido_id)
@@ -277,7 +283,7 @@ def asignar_pedidos(request):
         return redirect("asignar_pedidos")
 
     context = {
-        "pedidos_pendientes": pedidos_pendientes,
+        "pedidos_page_obj": pedidos_page_obj,
         "repartidores_disponibles": repartidores_disponibles,
     }
     return render(request, "EncargadoDeDespacho/asignar_pedidos.html", context)
