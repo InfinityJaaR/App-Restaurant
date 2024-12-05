@@ -60,11 +60,11 @@
             </a></li>
             {% endif %}
             {% if user.groups.all.0.name == 'Encargado de Menu' %}
-            <li><a href="{% url 'menu_diario' %}" class="nav-item">
-                <i class="fas fa-utensils"></i> Menú
+            <li><a href="{% url 'gestion_platillos' %}" class="nav-item">
+                <i class="fas fa-utensils"></i> Gestión de platillos
             </a></li>
-            <li><a href="/reservas" class="nav-item">
-                <i class="bi bi-journals"></i> Cátalogo
+            <li><a href="{% url 'menu_diario' %}" class="nav-item">
+                <i class="bi bi-journals"></i> Menú del día
             </a></li>
             {% endif %}
 
