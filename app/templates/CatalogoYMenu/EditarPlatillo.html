@@ -2,9 +2,9 @@
 {% load static %}
 
 {% block head %}
-<title>Agregar Platillo</title>
+<title>Editar Platillo</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="{% static 'css/agregarPlatillo.css' %}">
+<link rel="stylesheet" href="{% static 'css/EditarPlatillo.css' %}">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 {% endblock %}
@@ -14,55 +14,55 @@
     <div class="content-wrapper">
         <a class="btn-back" href="{% url 'gestion_platillos' %}"><i class=" fa fa-arrow-left"
                 style="margin-right: 0.5rem;"></i>Regresar</a>
-        <div class="title">Agregar Platillo</div>
+        <div class="title">Editar Platillo</div>
 
         <div class="form-container">
             <div class="container1">
-                <form action="{% url 'agregar_platillo' %}" method="POST" enctype="multipart/form-data">
+                <form action="{% url 'editar_platillo' platillo.id_platillo %}" method="POST" enctype="multipart/form-data">
                     {% csrf_token %}
                     <div class="form-group">
                         <label for="nombre" class="labels">Nombre:</label>
-                        <input type="text" name="nombre" id="nombre" required class="input">
+                        <input type="text" name="nombre" id="nombre" value="{{ platillo.nombre }}" required class="input">
                     </div>
                     <div class="form-group">
                         <label for="descripcion" class="labels">Descripción:</label>
-                        <textarea name="descripcion" id="descripcion" required class="input"></textarea>
+                        <textarea name="descripcion" id="descripcion" required class="input">{{ platillo.descripcion }}</textarea>
                     </div>
                     <div class="form-group">
                         <label for="precio" class="labels">Precio:</label>
-                        <input type="number" name="precio" id="precio" required class="input" step="0.01"
+                        <input type="number" name="precio" id="precio" value="{{ platillo.precio }}" required class="input" step="0.01"
                             style="width: min-content;">
                     </div>
                     <div class="form-group">
                         <label for="precio_puntos" class="labels">Precio en puntos:</label>
-                        <input type="number" name="precio_puntos" id="precio_puntos" step="1" required class="input"
+                        <input type="number" name="precio_puntos" id="precio_puntos" value="{{ platillo.precio_puntos }}" step="1" required class="input"
                             style="width: min-content;">
                     </div>
             </div>
 
             <div class="container2">
-                <form action="{% url 'agregar_platillo' %}" method="POST" enctype="multipart/form-data">
+                <form action="{% url 'editar_platillo' platillo.id_platillo %}" method="POST" enctype="multipart/form-data">
                     {% csrf_token %}
                 <div class="form-group">
                     <label for="recompensa_puntos" class="labels2">Recompensa en puntos:</label>
-                    <input type="number" name="recompensa_puntos" id="recompensa_puntos" step="1" required
+                    <input type="number" name="recompensa_puntos" id="recompensa_puntos" value="{{ platillo.recompensa_puntos }}" step="1" required
                         class="input2" style="width: min-content;">
                 </div>
                 <div class="form-group">
                     <label for="platillo_dia" class="labels2">¿Platillo del día?</label>
                     <select name="platillo_dia" id="platillo_dia" class="selection" required style="width: 20%;">
-                        <option value="1">Sí</option>
-                        <option value="0">No</option>
+                        <option value="1" {% if platillo.platillo_dia %}selected{% endif %}>Sí</option>
+                        <option value="0" {% if not platillo.platillo_dia %}selected{% endif %}>No</option>
                     </select>
                 </div>
                 <div class="form-group">
                     <label for="cantidad_maxima" class="labels2">Cantidad máxima:</label>
-                    <input type="number" name="cantidad_maxima" id="cantidad_maxima" step="1" required class="input2"
+                    <input type="number" name="cantidad_maxima" id="cantidad_maxima" value="{{ platillo.cantidad_maxima }}" step="1" required class="input2"
                         style="width: min-content;">
                 </div>
                 <div class="form-group">
                     <label for="imagen" class="labels2">Imagen:</label>
-                    <input type="file" name="imagen" id="imagen" required accept="image/*" type = "submit" class="input2" style="width: min-content;">
+                    <input type="file" name="imagen" id="imagen" accept="image/*" class="input2" style="width: min-content;">
                     
                 </div>
 

@@ -1,6 +1,8 @@
 from django.urls import path
 from .views import *
 from . import views
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('', home, name='home'),
@@ -29,7 +31,7 @@ urlpatterns = [
     path('consultar_menu/', consultar_menu, name='consultar_menu'),
     path('consultar_menu_dia/', consultar_menu_dia, name='consultar_menu_dia'),
     path('carrito/', ver_carrito, name='ver_carrito'),
-    path('agregar/<int:platillo_id>/    ', agregar_carrito, name='agregar_carrito'),
+    path('agregar/<int:platillo_id>/', agregar_carrito, name='agregar_carrito'),
     path('realiza_pedido/', realizar_pedido, name='procesar_pago'),
     path('vaciar_carrito/', vaciar_carrito, name='vaciar_carrito'),
     path('quitar_unidad/<int:platillo_id>/', quitar_unidad_carrito, name='quitar_unidad_carrito'),
@@ -38,5 +40,11 @@ urlpatterns = [
     path('consultar_pedido/', consultar_pedido, name='consultar_pedido'),
     path('pedido/<int:pedido_id>/reclamo/', registrar_reclamo, name='registrar_reclamo'),
     path('gestion_platillos/', gestionar_platillos, name='gestion_platillos'),
+    path('gestion_platillos/agregar/', agregar_platillo, name='agregar_platillo'),
+    path('gestion_platillos/editar/<int:platillo_id>/', editar_platillo, name='editar_platillo'),
+    path('gestion_platillos/eliminar/<int:platillo_id>/', eliminar_platillo, name='eliminar_platillo'),
     path('menu_dia/', menu_diario, name='menu_diario'),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
