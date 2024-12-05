@@ -834,14 +834,55 @@ def registro_pedido_cliente(request):
 @login_required
 def consultar_pedido(request):
     # Obtener el último pedido del usuario
-    ultimo_pedido = Pedido.objects.filter(usuario=request.user).order_by('-fecha').first()
-    
+    ultimo_pedido = Pedido.objects.filter(usuario=request.user).order_by('-id_pedido').first()
     if not ultimo_pedido:
         return render(request, 'Cliente/sin_pedidos.html')  # Página de error si no hay pedidos
     
     return render(request, 'Cliente/consultar_pedido.html', {
         'pedido': ultimo_pedido,
         'lineas': ultimo_pedido.lineas.all(),  # Las líneas del pedido
+    })
+
+@never_cache
+@login_required
+def registrar_reclamo(request, pedido_id):
+    # Obtener el pedido relacionado    
+    pedido = get_object_or_404(Pedido, id_pedido=pedido_id, usuario=request.user)
+
+  # Verificar si ya existe un reclamo para este pedido
+    if Reclamo.objects.filter(pedido=pedido).exists():
+        messages.error(request, "Ya existe un reclamo para este pedido. No puedes crear otro.")
+        return redirect('consultar_pedido')
+    
+    if request.method == 'POST':
+        # Procesar el reclamo enviado por el usuario
+        descripcion = request.POST.get('descripcion', '').strip()
+        calificacion = request.POST.get('calificacion', 3)
+
+        # Validaciones
+        if not descripcion:
+            messages.error(request, "La descripción del reclamo no puede estar vacía.")
+            return redirect('Cliente/registro_reclamo.html', pedido_id=pedido_id)
+
+        try:
+            calificacion = int(calificacion)
+            if calificacion < 1 or calificacion > 5:
+                raise ValueError
+        except ValueError:
+            messages.error(request, "La calificación debe ser un número entre 1 y 5.")
+            return redirect('Cliente/registro_reclamo.html', pedido_id=pedido_id)
+
+        # Crear el reclamo
+        Reclamo.objects.create(
+            pedido=pedido,
+            descripcion=descripcion,
+            calificacion=calificacion
+        )
+        messages.success(request, "Tu reclamo se ha enviado exitosamente.")
+        return redirect(consultar_pedido)
+    
+    return render(request, 'Cliente/registro_reclamo.html', {
+        'pedido': pedido
     })
 
 @login_required
