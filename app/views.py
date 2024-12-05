@@ -760,7 +760,7 @@ def registro_pedido_cliente(request):
                                form_render=False   
                                carrito = obtener_carrito(request) 
                                carrito.items.all().delete()            
-                               return redirect (consultar_pedido)    
+                               return redirect('consultar_pedido', pedido_id=pedido.id_pedido)   
                         else:
                             render_button = True
                             messages.warning(request, 'No tienes suficientes puntos para realizar la compra')
@@ -803,7 +803,7 @@ def registro_pedido_cliente(request):
                     form_render=False   
                     carrito = obtener_carrito(request) 
                     carrito.items.all().delete()            
-                    return redirect (consultar_pedido)                                    
+                    return redirect('consultar_pedido', pedido_id=pedido.id_pedido)
             else:
                   
                   return render(request, 'Cliente/registro_pedido.html', {
@@ -832,11 +832,21 @@ def registro_pedido_cliente(request):
         'total_puntos':total_puntos,
     })
 
+
+@login_required
+def ver_pedidos(request):
+    # Obtener todos los pedidos del usuario
+    pedidos = Pedido.objects.filter(usuario=request.user)
+    
+    return render(request, 'Cliente/consultar_pedidos.html', {
+        'pedidos': pedidos
+})
+
 @never_cache
 @login_required
-def consultar_pedido(request):
+def consultar_pedido(request,pedido_id):
     # Obtener el último pedido del usuario
-    ultimo_pedido = Pedido.objects.filter(usuario=request.user).order_by('-id_pedido').first()
+    ultimo_pedido = get_object_or_404(Pedido, id_pedido=pedido_id, usuario=request.user)
     if not ultimo_pedido:
         return render(request, 'Cliente/sin_pedidos.html')  # Página de error si no hay pedidos
     
