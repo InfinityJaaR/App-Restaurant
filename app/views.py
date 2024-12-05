@@ -194,6 +194,7 @@ def perfil_cliente(request):
     
     if request.method == 'POST':
         user.first_name = request.POST.get('nombre')
+        user.username = request.POST.get('email')
         user.email = request.POST.get('email')
         mas_campos.direccion = request.POST.get('direccion')
         mas_campos.telefono = request.POST.get('telefono')
