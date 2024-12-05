@@ -432,19 +432,27 @@ def gestionar_regalias(request):
 
 #Cliente
 def consultar_menu(request):
+    carrito = obtener_carrito(request)
+    items = carrito.items.all()
+    total = sum(item.total for item in items)
     platillos = Platillo.objects.all()
     platillos_dia = Platillo.objects.filter(platillo_dia=True)    
     context = {
         'platillos': platillos,
-        'platillos_dia': list(platillos_dia)
+        'platillos_dia': list(platillos_dia),
+        'total':total
     }
     return render(request, 'Cliente/consultar_menu.html', context)
 
 @login_required
 def consultar_menu_dia(request):
+    carrito = obtener_carrito(request)
+    items = carrito.items.all()
+    total = sum(item.total for item in items)
     platillos_dia = Platillo.objects.filter(platillo_dia=True)
     context = {
-        'platillos_dia': platillos_dia
+        'platillos_dia': platillos_dia,
+        'total':total
     }
     return render(request, 'Cliente/consultar_menu_dia.html', context)
 

@@ -33,6 +33,12 @@
             <li><a href="{% url 'perfil_cliente' %}" class="nav-item">
                 <i class="fa-solid fa-user"></i> Mi Perfil
             </a></li>
+            <li><a href="{% url 'consultar_menu' %}" class="nav-item">
+                <i class="fa-solid fa-mug-saucer"></i> Menu
+            </a></li>
+            <li><a href="{% url 'consultar_menu_dia' %}" class="nav-item">
+                <i class="fa-solid fa-mug-saucer"></i> Menu del dia
+            </a></li>
             {% endif %}
             {% if user.groups.all.0.name == 'Repartidor' %}
             <li><a href="{% url 'repartidor' %}" class="nav-item">
