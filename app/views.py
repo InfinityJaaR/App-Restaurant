@@ -418,6 +418,30 @@ def crear_cupon(request):
         messages.success(request, 'Cupón creado exitosamente.')
         return redirect('gestionar_regalias')
 
+def eliminar_cupon(request, id_cupon):
+    cupon = get_object_or_404(Cupon, id_cupon=id_cupon)
+    if request.method == 'POST':
+        cupon.delete()
+        messages.success(request, 'Cupon eliminado correctamente.')
+        return redirect('gestionar_regalias')  # Cambia al nombre de tu vista correspondiente
+    return JsonResponse({'error': 'Método no permitido'}, status=405)
+
+@csrf_exempt
+def editar_cupon(request):
+    if request.method == 'POST':
+        id_cupon = request.POST.get('id_cupon')
+        codigo = request.POST.get('codigo')
+        descuento = request.POST.get('descuento')
+        fecha_expiracion = request.POST.get('fecha_expiracion')
+        cupon = get_object_or_404(Cupon, id_cupon=id_cupon)
+        cupon.codigo = codigo
+        cupon.descuento = descuento
+        cupon.fecha_expiracion = fecha_expiracion
+        cupon.save()
+        messages.success(request, 'Cupon modificado correctamente.')
+        return redirect('gestionar_regalias')  # Cambia al nombre de tu vista correspondiente
+    return JsonResponse({'error': 'Método no permitido'}, status=405)
+
 def gestionar_regalias(request):
     cupones_list = Cupon.objects.all()
     query = request.GET.get('q')
