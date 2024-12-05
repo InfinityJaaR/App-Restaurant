@@ -887,16 +887,13 @@ def agregar_platillo(request):
 
 @login_required
 def editar_platillo(request, platillo_id):
-    platillo = get_object_or_404(Platillo, id=platillo_id)
+    platillo = get_object_or_404(Platillo, id_platillo=platillo_id)
 
     if request.method == 'POST':
         platillo.nombre = request.POST.get('nombre')
         platillo.descripcion = request.POST.get('descripcion')
         if 'imagen' in request.FILES:
-            imagen = request.FILES['imagen']
-            fs = FileSystemStorage()
-            filename = fs.save(imagen.name, imagen)
-            platillo.imagen = fs.url(filename)
+            platillo.imagen = request.FILES['imagen']
         platillo.precio = request.POST.get('precio')
         platillo.precio_puntos = request.POST.get('precio_puntos')
         platillo.recompensa_puntos = request.POST.get('recompensa_puntos')
@@ -905,10 +902,7 @@ def editar_platillo(request, platillo_id):
         platillo.save()
         return redirect('gestion_platillos')
 
-    context = {
-        'platillo': platillo
-    }
-    return render(request, 'CatalogoYMenu/EditarPlatillo.html', context)
+    return render(request, 'CatalogoYMenu/EditarPlatillo.html', {'platillo': platillo})
 
 @login_required
 def eliminar_platillo(request, platillo_id):
