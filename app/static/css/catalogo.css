@@ -104,10 +104,9 @@
 
 /* Estilos para las imágenes dentro de las cards */
 .card img {
-    width: 1920px;
-    height: 1510px;
+    width: 100%; /* La imagen ocupa el ancho completo del contenedor */
+    height: auto; /* Mantiene la proporción de la imagen */
     object-fit: cover;
-    display: contents;
     border-top-left-radius: 10px; /* Redondea las esquinas superiores de la imagen */
     border-top-right-radius: 10px; /* Redondea las esquinas superiores de la imagen */
 }
