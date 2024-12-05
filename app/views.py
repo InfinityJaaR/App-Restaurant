@@ -431,6 +431,8 @@ def gestionar_regalias(request):
     return render(request, 'Administrador/gestionarRegalias.html', {'cupones': cupones})
 
 #Cliente
+
+@never_cache
 def consultar_menu(request):
     carrito = obtener_carrito(request)
     items = carrito.items.all()
@@ -444,7 +446,7 @@ def consultar_menu(request):
     }
     return render(request, 'Cliente/consultar_menu.html', context)
 
-@login_required
+@never_cache
 def consultar_menu_dia(request):
     carrito = obtener_carrito(request)
     items = carrito.items.all()
@@ -730,7 +732,7 @@ def registro_pedido_cliente(request):
                                form_render=False   
                                carrito = obtener_carrito(request) 
                                carrito.items.all().delete()            
-                               return render (request,'Cliente/registro_pedido.html',{'render_button':render_button,'form_render':form_render})                                    
+                               return redirect (consultar_pedido)    
                         else:
                             render_button = True
                             messages.warning(request, 'No tienes suficientes puntos para realizar la compra')
@@ -773,7 +775,7 @@ def registro_pedido_cliente(request):
                     form_render=False   
                     carrito = obtener_carrito(request) 
                     carrito.items.all().delete()            
-                    return render (request,'Cliente/registro_pedido.html',{'render_button':render_button,'form_render':form_render})                                    
+                    return redirect (consultar_pedido)                                    
             else:
                   
                   return render(request, 'Cliente/registro_pedido.html', {
@@ -800,6 +802,20 @@ def registro_pedido_cliente(request):
         'usuario': datos_usuario,
         'render_button':render_button,
         'total_puntos':total_puntos,
+    })
+
+@never_cache
+@login_required
+def consultar_pedido(request):
+    # Obtener el último pedido del usuario
+    ultimo_pedido = Pedido.objects.filter(usuario=request.user).order_by('-fecha').first()
+    
+    if not ultimo_pedido:
+        return render(request, 'Cliente/sin_pedidos.html')  # Página de error si no hay pedidos
+    
+    return render(request, 'Cliente/consultar_pedido.html', {
+        'pedido': ultimo_pedido,
+        'lineas': ultimo_pedido.lineas.all(),  # Las líneas del pedido
     })
 
 @login_required
