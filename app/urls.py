@@ -1,6 +1,8 @@
 from django.urls import path
 from .views import *
 from . import views
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('', home, name='home'),
@@ -35,7 +37,10 @@ urlpatterns = [
     path('procesar_pago', registro_pedido_cliente, name='registro_pedido_cliente'),
     path('gestion_platillos/', gestionar_platillos, name='gestion_platillos'),
     path('gestion_platillos/agregar/', agregar_platillo, name='agregar_platillo'),
-    path('gestion_platillos/editar/<int:platillo_id>/', views.editar_platillo, name='editar_platillo'),
-    path('gestion_platillos/eliminar/<int:platillo_id>/', views.eliminar_platillo, name='eliminar_platillo'),
+    path('gestion_platillos/editar/<int:platillo_id>/', editar_platillo, name='editar_platillo'),
+    path('gestion_platillos/eliminar/<int:platillo_id>/', eliminar_platillo, name='eliminar_platillo'),
     path('menu_dia/', menu_diario, name='menu_diario'),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

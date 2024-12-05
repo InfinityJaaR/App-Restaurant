@@ -798,11 +798,8 @@ def registro_pedido_cliente(request):
 
 @login_required
 def gestionar_platillos(request):
-    platillos = Platillo.objects.all()
-    context = {
-        'platillos': platillos
-    }
-    return render(request, 'CatalogoYMenu/catalogo.html', context)
+    platillos = Platillo.objects.all()  # Recupera todos los platillos
+    return render(request, 'CatalogoYMenu/catalogo.html', {'platillos': platillos})
 
 @login_required
 def menu_diario(request):
@@ -824,17 +821,14 @@ def agregar_platillo(request):
         platillo_dia = request.POST.get('platillo_dia')
         cantidad_maxima = request.POST.get('cantidad_maxima')
 
-        fs = FileSystemStorage()
-        filename = fs.save(imagen.name, imagen)
-        uploaded_file_url = fs.url(filename)
         platillo = Platillo.objects.create(
             nombre=nombre,
             descripcion=descripcion,
-            imagen=uploaded_file_url,
+            imagen=imagen,
             precio=precio,
             precio_puntos=precio_puntos,
             recompensa_puntos=recompensa_puntos,
-            platillo_dia=platillo_dia,
+            platillo_dia=platillo_dia == '1',
             cantidad_maxima=cantidad_maxima
         )
         return redirect('gestion_platillos')
