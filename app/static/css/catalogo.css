@@ -88,39 +88,64 @@
 }
 
 .card {
-    margin-bottom: 30px;
-    margin: auto;
-    border: 1px solid #ccc;
-    border-radius: 10px; /* Redondea los bordes */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Añade una sombra */
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
     overflow: hidden;
     text-align: center;
-    transition: box-shadow 0.3s ease; /* Añade una transición suave para la sombra */
+    display: flex;
+    flex-direction: column;
+    height: 100%; /* Asegura que todas las tarjetas tengan la misma altura */
 }
 
+/* Transición suave y sombra */
 .card:hover {
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Aumenta la sombra al pasar el ratón por encima */
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
 }
 
 /* Estilos para las imágenes dentro de las cards */
 .card img {
-    width: 100%; /* La imagen ocupa el ancho completo del contenedor */
-    height: auto; /* Mantiene la proporción de la imagen */
+    width: 1000px; /* La imagen ocupa el ancho completo del contenedor */
+    height: 225px; /* Mantiene la proporción de la imagen */
     object-fit: cover;
     border-top-left-radius: 10px; /* Redondea las esquinas superiores de la imagen */
     border-top-right-radius: 10px; /* Redondea las esquinas superiores de la imagen */
 }
 
 .card-body {
-    padding: 6rem;
+    padding: 15px;
+    display: flex;
+    flex-direction: column; /* Cambia la dirección del contenido a columna */
+    justify-content: space-between; /* Distribuye el espacio entre los elementos */
+    align-items: flex-start; /* Alinea los elementos a la izquierda */
+    height: 100%; /* Asegura que el cuerpo de la tarjeta ocupe todo el espacio disponible */
+}
+
+.card-title {
+    font-size: 1.2rem;
+    font-weight: 500;
+    color: #333;
+    margin: 0 0 10px 0; /* Añade margen inferior para separar el título de los botones */
+    width: 100%; /* Asegura que el título ocupe todo el ancho disponible */
+    text-align: left; /* Alinea el título a la izquierda */
+}
+
+.btn-container {
+    display: flex;
+    justify-content: flex-start; /* Alinea los botones a la izquierda */
+    width: 100%; /* Asegura que el contenedor de los botones ocupe todo el ancho disponible */
 }
 
 .btn-edit, .btn-delete {
-    margin: 5px;
+    margin: 5px 5px 5px 0; /* Añade margen entre los botones */
     padding: 10px 15px;
     border: none;
     border-radius: 5px;
     cursor: pointer;
+    text-align: left; /* Alinea el texto de los botones a la izquierda */
+    display: inline-block; /* Asegura que los botones se desplieguen en línea */
 }
 
 .btn-edit {
@@ -186,7 +211,6 @@
     border-radius: 5px;
     cursor: pointer;
     font-size: 16px;
-    margin: 5px;
 }
 
 .btn-confirm {
