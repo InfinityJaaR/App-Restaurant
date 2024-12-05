@@ -55,6 +55,7 @@ def registro(request):
         if password == password2:
             if User.objects.filter(username=email).exists():
                 messages.error(request, 'El email ya está registrado')
+                return redirect('login')  # Cambiado de render a redirect
             else:
                 user = User.objects.create_user(username=email, email=email, password=password, first_name=nombre)
                 user.save()
@@ -65,7 +66,8 @@ def registro(request):
                 return redirect('login')
         else:
             messages.error(request, 'Las contraseñas no coinciden')
-    return render(request, 'login')
+            return redirect('login')  # Cambiado de render a redirect
+    return redirect('login')  # Cambiado de render a redirect para el caso GET
 
 @login_required
 def nuevoUsuario(request, id=None):
