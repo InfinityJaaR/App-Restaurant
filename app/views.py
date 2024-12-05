@@ -15,6 +15,8 @@ from datetime import timedelta
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.core.exceptions import ValidationError
+from django.core.files.storage import FileSystemStorage
+from django.shortcuts import get_object_or_404
 from django.views.decorators.cache import never_cache
 
 # Create your views here.
@@ -846,11 +848,8 @@ def consultar_pedido(request):
 
 @login_required
 def gestionar_platillos(request):
-    platillos = Platillo.objects.all()
-    context = {
-        'platillos': platillos
-    }
-    return render(request, 'CatalogoYMenu/catalogo.html', context)
+    platillos = Platillo.objects.all()  # Recupera todos los platillos
+    return render(request, 'CatalogoYMenu/catalogo.html', {'platillos': platillos})
 
 @login_required
 def menu_diario(request):
@@ -859,3 +858,54 @@ def menu_diario(request):
         'platillos': platillos
     }
     return render(request, 'CatalogoYMenu/menudia.html', context)
+
+@login_required
+def agregar_platillo(request):
+    if request.method == 'POST':
+        nombre = request.POST.get('nombre')
+        descripcion = request.POST.get('descripcion')
+        imagen = request.FILES.get('imagen')
+        precio = request.POST.get('precio')
+        precio_puntos = request.POST.get('precio_puntos')
+        recompensa_puntos = request.POST.get('recompensa_puntos')
+        platillo_dia = request.POST.get('platillo_dia')
+        cantidad_maxima = request.POST.get('cantidad_maxima')
+
+        platillo = Platillo.objects.create(
+            nombre=nombre,
+            descripcion=descripcion,
+            imagen=imagen,
+            precio=precio,
+            precio_puntos=precio_puntos,
+            recompensa_puntos=recompensa_puntos,
+            platillo_dia=platillo_dia == '1',
+            cantidad_maxima=cantidad_maxima
+        )
+        return redirect('gestion_platillos')
+
+    return render(request, 'CatalogoYMenu/AgregarPlatillo.html')
+
+@login_required
+def editar_platillo(request, platillo_id):
+    platillo = get_object_or_404(Platillo, id_platillo=platillo_id)
+
+    if request.method == 'POST':
+        platillo.nombre = request.POST.get('nombre')
+        platillo.descripcion = request.POST.get('descripcion')
+        if 'imagen' in request.FILES:
+            platillo.imagen = request.FILES['imagen']
+        platillo.precio = request.POST.get('precio')
+        platillo.precio_puntos = request.POST.get('precio_puntos')
+        platillo.recompensa_puntos = request.POST.get('recompensa_puntos')
+        platillo.platillo_dia = request.POST.get('platillo_dia') == '1'
+        platillo.cantidad_maxima = request.POST.get('cantidad_maxima')
+        platillo.save()
+        return redirect('gestion_platillos')
+
+    return render(request, 'CatalogoYMenu/EditarPlatillo.html', {'platillo': platillo})
+
+@login_required
+def eliminar_platillo(request, platillo_id):
+    platillo = get_object_or_404(Platillo, id_platillo=platillo_id)
+    platillo.delete()
+    return redirect('gestion_platillos')
