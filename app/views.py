@@ -894,9 +894,6 @@ def editar_platillo(request, platillo_id):
         platillo.descripcion = request.POST.get('descripcion')
         if 'imagen' in request.FILES:
             imagen = request.FILES['imagen']
-            fs = FileSystemStorage()
-            filename = fs.save(imagen.name, imagen)
-            platillo.imagen = fs.url(filename)
         platillo.precio = request.POST.get('precio')
         platillo.precio_puntos = request.POST.get('precio_puntos')
         platillo.recompensa_puntos = request.POST.get('recompensa_puntos')
