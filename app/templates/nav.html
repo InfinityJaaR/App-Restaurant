@@ -98,12 +98,6 @@
             navLinks.classList.toggle('show');
             navToggle.classList.toggle('active');
         });
-
-        if ("serviceWorker" in navigator) {
-            navigator.serviceWorker.register("{% static 'js/service-worker.js' %}")
-                .then(() => console.log("Service Worker registrado"))
-                .catch((error) => console.error("Error registrando el Service Worker:", error));
-        }
     </script>
     {% block scripts %}    
     {% endblock %}  

@@ -1,9 +1,6 @@
 from django.urls import path
 from .views import *
 from . import views
-from django.conf import settings
-from django.conf.urls.static import static
-
 
 urlpatterns = [
     path('', home, name='home'),
@@ -38,4 +35,4 @@ urlpatterns = [
     path('procesar_pago', registro_pedido_cliente, name='registro_pedido_cliente'),
     path('gestion_platillos/', gestionar_platillos, name='gestion_platillos'),
     path('menu_dia/', menu_diario, name='menu_diario'),
-] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+]
