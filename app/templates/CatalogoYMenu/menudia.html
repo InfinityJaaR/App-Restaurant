@@ -6,14 +6,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="{% static 'css/menudia.css' %}">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 {% endblock %}
 
 {% block content %}
 <div class="page-container">
     <div class="content-wrapper">
-        <div class="titulo">
-            <h1>Menú del Día</h1>
+        <div class="header">
+            <h1 class="titulo">Menú del Día</h1>
         </div>
         {% if messages %}
         <div class="messages">
@@ -24,11 +23,14 @@
             {% endfor %}
         </div>
         {% endif %}
-
         <div class="barra">
-            <h2 class="barra-texto">Platillos seleccionados para hoy</h2>
-            <a class="barra-updtbtn" href="{% url 'menu_diario' %}"><i class="fa fa-cloud-download" 
-                style="margin-right: 0.5rem;"></i>Actualizar</a>
+            <div class="barra-texto">
+                <h3>Platillos del día</h3>
+            </div>
+            <div class="barra-updtbtn">
+                <a href="{% url 'menu_diario' %}"><i class="fa fa-cloud-download"
+                    style="margin-right: 0.3rem;"></i>Actualizar</a>
+            </div>
         </div>
 
         <div class="menu-container">

@@ -78,6 +78,7 @@
     display: flex;
     flex-wrap: wrap;
     margin: 0 -15px;
+    margin-bottom: 30px; /* Ajusta este valor según sea necesario */
 }
 
 .col-4 {
@@ -107,8 +108,8 @@
 
 /* Estilos para las imágenes dentro de las cards */
 .card img {
-    width: 1000px; /* La imagen ocupa el ancho completo del contenedor */
-    height: 225px; /* Mantiene la proporción de la imagen */
+    width: 1000px;
+    height: 225px;
     object-fit: cover;
     border-top-left-radius: 10px; /* Redondea las esquinas superiores de la imagen */
     border-top-right-radius: 10px; /* Redondea las esquinas superiores de la imagen */
