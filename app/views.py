@@ -168,13 +168,13 @@ def perfil(request):
 def pedidos(request):
     if request.method == 'POST':
         pedido = Pedido.objects.get(id_pedido=request.POST.get('id_pedido'))
-        pedido.estado = Estado.objects.get(id_estado=6)  # Cambiado a 3 para marcar como entregado
+        pedido.estado = Estado.objects.get(id_estado=4)  # Cambiado a 3 para marcar como entregado
         pedido.save()
         messages.success(request, 'Pedido entregado correctamente')
         return redirect('pedidos')
 
     pedidos_asignados = Pedido.objects.filter(repartidor=request.user)
-    pedidos_entregados = pedidos_asignados.filter(estado__id_estado=6)# estado 3 = Entregados
+    pedidos_entregados = pedidos_asignados.filter(estado__id_estado=4)# estado 3 = Entregados
     
     return render(request, 'Repartidor/pedido.html', {'pedidos': pedidos_asignados, 'pedidos_entregados': pedidos_entregados})
     
@@ -184,7 +184,7 @@ def detalle_pedido(request, id_pedido):
     pedido = Pedido.objects.get(id_pedido=id_pedido)
     
     if request.method == 'POST':
-        pedido.estado = Estado.objects.get(id_estado=6)  # 3 = Entregado
+        pedido.estado = Estado.objects.get(id_estado=4)  # 3 = Entregado
         pedido.save()
         messages.success(request, 'Pedido entregado correctamente')
         return redirect('pedidos')
@@ -679,7 +679,7 @@ def registro_pedido_cliente(request):
                 subtotal=0,
                 tipo_pago=request.POST.get('tipo_pago', 'efectivo'),  # Obtenemos el tipo de pago del formulario (efectivo o tarjeta)
                 total_puntos=0,
-                estado=Estado.objects.get(nombre='Pendiente'))
+                estado=Estado.objects.get(nombre='Preparando'))
                 
                 # Crear las lineas del pedido
                 for item in items:
@@ -761,7 +761,7 @@ def registro_pedido_cliente(request):
                                form_render=False   
                                carrito = obtener_carrito(request) 
                                carrito.items.all().delete()            
-                               return redirect (consultar_pedido)    
+                               return redirect('consultar_pedido', pedido_id=pedido.id_pedido)   
                         else:
                             render_button = True
                             messages.warning(request, 'No tienes suficientes puntos para realizar la compra')
@@ -804,7 +804,7 @@ def registro_pedido_cliente(request):
                     form_render=False   
                     carrito = obtener_carrito(request) 
                     carrito.items.all().delete()            
-                    return redirect (consultar_pedido)                                    
+                    return redirect('consultar_pedido', pedido_id=pedido.id_pedido)
             else:
                   
                   return render(request, 'Cliente/registro_pedido.html', {
@@ -833,11 +833,21 @@ def registro_pedido_cliente(request):
         'total_puntos':total_puntos,
     })
 
+
+@login_required
+def ver_pedidos(request):
+    # Obtener todos los pedidos del usuario
+    pedidos = Pedido.objects.filter(usuario=request.user)
+    
+    return render(request, 'Cliente/consultar_pedidos.html', {
+        'pedidos': pedidos
+})
+
 @never_cache
 @login_required
-def consultar_pedido(request):
+def consultar_pedido(request,pedido_id):
     # Obtener el último pedido del usuario
-    ultimo_pedido = Pedido.objects.filter(usuario=request.user).order_by('-id_pedido').first()
+    ultimo_pedido = get_object_or_404(Pedido, id_pedido=pedido_id, usuario=request.user)
     if not ultimo_pedido:
         return render(request, 'Cliente/sin_pedidos.html')  # Página de error si no hay pedidos
     
