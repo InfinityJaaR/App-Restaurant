@@ -44,6 +44,9 @@
             <li><a href="{% url 'consultar_menu_dia' %}" class="nav-item">
                 <i class="fa-solid fa-mug-saucer"></i> Menu del dia
             </a></li>
+            <li><a href="{% url 'consultar_pedido' %}" class="nav-item">
+                <i class="fa-solid fa-truck-fast"></i> Pedidos
+            </a></li>
             {% endif %}
             {% if user.groups.all.0.name == 'Repartidor' %}
             <li><a href="{% url 'repartidor' %}" class="nav-item">
@@ -62,11 +65,11 @@
             </a></li>
             {% endif %}
             {% if user.groups.all.0.name == 'Encargado de Menu' %}
-            <li><a href="{% url 'menu_diario' %}" class="nav-item">
-                <i class="fas fa-utensils"></i> Menú
+            <li><a href="{% url 'gestion_platillos' %}" class="nav-item">
+                <i class="fas fa-utensils"></i> Gestión de platillos
             </a></li>
-            <li><a href="/reservas" class="nav-item">
-                <i class="bi bi-journals"></i> Cátalogo
+            <li><a href="{% url 'menu_diario' %}" class="nav-item">
+                <i class="bi bi-journals"></i> Menú del día
             </a></li>
             {% endif %}
 

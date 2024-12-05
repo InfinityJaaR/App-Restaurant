@@ -15,6 +15,8 @@ from datetime import timedelta
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.core.exceptions import ValidationError
+from django.core.files.storage import FileSystemStorage
+from django.shortcuts import get_object_or_404
 from django.views.decorators.cache import never_cache
 
 # Create your views here.
@@ -458,6 +460,8 @@ def gestionar_regalias(request):
     return render(request, 'Administrador/gestionarRegalias.html', {'cupones': cupones})
 
 #Cliente
+
+@never_cache
 def consultar_menu(request):
     carrito = obtener_carrito(request)
     items = carrito.items.all()
@@ -471,7 +475,7 @@ def consultar_menu(request):
     }
     return render(request, 'Cliente/consultar_menu.html', context)
 
-@login_required
+@never_cache
 def consultar_menu_dia(request):
     carrito = obtener_carrito(request)
     items = carrito.items.all()
@@ -757,7 +761,7 @@ def registro_pedido_cliente(request):
                                form_render=False   
                                carrito = obtener_carrito(request) 
                                carrito.items.all().delete()            
-                               return render (request,'Cliente/registro_pedido.html',{'render_button':render_button,'form_render':form_render})                                    
+                               return redirect (consultar_pedido)    
                         else:
                             render_button = True
                             messages.warning(request, 'No tienes suficientes puntos para realizar la compra')
@@ -800,7 +804,7 @@ def registro_pedido_cliente(request):
                     form_render=False   
                     carrito = obtener_carrito(request) 
                     carrito.items.all().delete()            
-                    return render (request,'Cliente/registro_pedido.html',{'render_button':render_button,'form_render':form_render})                                    
+                    return redirect (consultar_pedido)                                    
             else:
                   
                   return render(request, 'Cliente/registro_pedido.html', {
@@ -829,13 +833,65 @@ def registro_pedido_cliente(request):
         'total_puntos':total_puntos,
     })
 
+@never_cache
+@login_required
+def consultar_pedido(request):
+    # Obtener el último pedido del usuario
+    ultimo_pedido = Pedido.objects.filter(usuario=request.user).order_by('-id_pedido').first()
+    if not ultimo_pedido:
+        return render(request, 'Cliente/sin_pedidos.html')  # Página de error si no hay pedidos
+    
+    return render(request, 'Cliente/consultar_pedido.html', {
+        'pedido': ultimo_pedido,
+        'lineas': ultimo_pedido.lineas.all(),  # Las líneas del pedido
+    })
+
+@never_cache
+@login_required
+def registrar_reclamo(request, pedido_id):
+    # Obtener el pedido relacionado    
+    pedido = get_object_or_404(Pedido, id_pedido=pedido_id, usuario=request.user)
+
+  # Verificar si ya existe un reclamo para este pedido
+    if Reclamo.objects.filter(pedido=pedido).exists():
+        messages.error(request, "Ya existe un reclamo para este pedido. No puedes crear otro.")
+        return redirect('consultar_pedido')
+    
+    if request.method == 'POST':
+        # Procesar el reclamo enviado por el usuario
+        descripcion = request.POST.get('descripcion', '').strip()
+        calificacion = request.POST.get('calificacion', 3)
+
+        # Validaciones
+        if not descripcion:
+            messages.error(request, "La descripción del reclamo no puede estar vacía.")
+            return redirect('Cliente/registro_reclamo.html', pedido_id=pedido_id)
+
+        try:
+            calificacion = int(calificacion)
+            if calificacion < 1 or calificacion > 5:
+                raise ValueError
+        except ValueError:
+            messages.error(request, "La calificación debe ser un número entre 1 y 5.")
+            return redirect('Cliente/registro_reclamo.html', pedido_id=pedido_id)
+
+        # Crear el reclamo
+        Reclamo.objects.create(
+            pedido=pedido,
+            descripcion=descripcion,
+            calificacion=calificacion
+        )
+        messages.success(request, "Tu reclamo se ha enviado exitosamente.")
+        return redirect(consultar_pedido)
+    
+    return render(request, 'Cliente/registro_reclamo.html', {
+        'pedido': pedido
+    })
+
 @login_required
 def gestionar_platillos(request):
-    platillos = Platillo.objects.all()
-    context = {
-        'platillos': platillos
-    }
-    return render(request, 'CatalogoYMenu/catalogo.html', context)
+    platillos = Platillo.objects.all()  # Recupera todos los platillos
+    return render(request, 'CatalogoYMenu/catalogo.html', {'platillos': platillos})
 
 @login_required
 def menu_diario(request):
@@ -844,3 +900,54 @@ def menu_diario(request):
         'platillos': platillos
     }
     return render(request, 'CatalogoYMenu/menudia.html', context)
+
+@login_required
+def agregar_platillo(request):
+    if request.method == 'POST':
+        nombre = request.POST.get('nombre')
+        descripcion = request.POST.get('descripcion')
+        imagen = request.FILES.get('imagen')
+        precio = request.POST.get('precio')
+        precio_puntos = request.POST.get('precio_puntos')
+        recompensa_puntos = request.POST.get('recompensa_puntos')
+        platillo_dia = request.POST.get('platillo_dia')
+        cantidad_maxima = request.POST.get('cantidad_maxima')
+
+        platillo = Platillo.objects.create(
+            nombre=nombre,
+            descripcion=descripcion,
+            imagen=imagen,
+            precio=precio,
+            precio_puntos=precio_puntos,
+            recompensa_puntos=recompensa_puntos,
+            platillo_dia=platillo_dia == '1',
+            cantidad_maxima=cantidad_maxima
+        )
+        return redirect('gestion_platillos')
+
+    return render(request, 'CatalogoYMenu/AgregarPlatillo.html')
+
+@login_required
+def editar_platillo(request, platillo_id):
+    platillo = get_object_or_404(Platillo, id_platillo=platillo_id)
+
+    if request.method == 'POST':
+        platillo.nombre = request.POST.get('nombre')
+        platillo.descripcion = request.POST.get('descripcion')
+        if 'imagen' in request.FILES:
+            platillo.imagen = request.FILES['imagen']
+        platillo.precio = request.POST.get('precio')
+        platillo.precio_puntos = request.POST.get('precio_puntos')
+        platillo.recompensa_puntos = request.POST.get('recompensa_puntos')
+        platillo.platillo_dia = request.POST.get('platillo_dia') == '1'
+        platillo.cantidad_maxima = request.POST.get('cantidad_maxima')
+        platillo.save()
+        return redirect('gestion_platillos')
+
+    return render(request, 'CatalogoYMenu/EditarPlatillo.html', {'platillo': platillo})
+
+@login_required
+def eliminar_platillo(request, platillo_id):
+    platillo = get_object_or_404(Platillo, id_platillo=platillo_id)
+    platillo.delete()
+    return redirect('gestion_platillos')
