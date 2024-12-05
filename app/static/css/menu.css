@@ -3,6 +3,26 @@
   color: #1a1a1a !important;
 }
 
+.btn-yellow{
+  background: #ffd700 !important;
+  color: #1a1a1a !important;
+}
+
 .btn-red:hover{
   background: rgb(202 34 34) !important;  
 }
+
+.swiper-wrapper {
+  width: 100%;
+  height: max-content !important;
+  padding-bottom: 64px !important;
+  -webkit-transition-timing-function: linear !important;
+  transition-timing-function: linear !important;
+  position: relative;
+  }
+  .swiper-pagination-bullet {
+  background: black;
+  }
+  .swiper-pagination-bullet-active {
+  background: black !important;
+  }
