@@ -1,0 +1,48 @@
+{% extends 'nav.html' %}
+{% load static %}
+
+{% block head %}
+    <title>Agregar Platillo</title>
+    <link rel="stylesheet" href="{% static 'css/AgregarPlatillo.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <h2>Nuevo Platillo</h2>
+            <p>Contenido del modal...</p>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Obtener el modal
+    var modal = document.getElementById("modal");
+
+    // Obtener el botón que abre el modal
+    var btn = document.getElementById("myBtn");
+
+    // Obtener el elemento <span> que cierra el modal
+    var span = document.getElementsByClassName("close-btn")[0];
+
+    // Cuando el usuario hace clic en el botón, abre el modal
+    btn.onclick = function() {
+        modal.style.display = "block";
+    }
+
+    // Cuando el usuario hace clic en <span> (x), cierra el modal
+    span.onclick = function() {
+        modal.style.display = "none";
+    }
+
+    // Cuando el usuario hace clic en cualquier lugar fuera del modal, cierra el modal
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+</script>
+{% endblock %}

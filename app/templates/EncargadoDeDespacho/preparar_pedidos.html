@@ -1,0 +1,97 @@
+{% extends 'nav.html' %}
+{% load static %}
+
+{% block head %}
+  <title>Preparar Pedidos</title>
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto p-6 flex justify-center">
+  <div class="w-full max-w-6xl bg-white shadow-md rounded-lg p-6">
+    <h1 class="text-3xl font-bold mb-6 text-center">Preparar Pedidos</h1>
+
+    <!-- Mensajes del servidor -->
+    <div id="server-messages" class="space-y-4"></div>
+
+    <!-- Tabla de pedidos -->
+    <div class="overflow-x-auto">
+      <table class="w-full table-auto border-collapse mt-6">
+        <thead>
+          <tr class="bg-gray-200 text-gray-700">
+            <th class="border px-4 py-2">ID</th>
+            <th class="border px-4 py-2">Cliente</th>
+            <th class="border px-4 py-2">Total</th>
+            <th class="border px-4 py-2">Estado</th>
+            <th class="border px-4 py-2">Detalles</th>
+            <th class="border px-4 py-2">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for pedido in page_obj %}
+            <tr class="border-b" data-pedido-id="{{ pedido.id_pedido }}">
+              <td class="border px-4 py-2 whitespace-nowrap">{{ pedido.id_pedido }}</td>
+              <td class="border px-4 py-2 whitespace-nowrap">
+                {{ pedido.usuario.first_name }} {{ pedido.usuario.last_name }}
+                {% if not pedido.usuario %}{{ pedido.cliente_no_registrado.nombre }}{% endif %}
+              </td>
+              <td class="border px-4 py-2 whitespace-nowrap">${{ pedido.total }}</td>
+              <td class="border px-4 py-2 whitespace-nowrap estado">{{ pedido.estado.nombre }}</td>
+              <td class="border px-4 py-2 text-center whitespace-nowrap">
+                <a href="{% url 'detalles_pedido' pedido.id_pedido %}" class="bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded w-40 text-center">
+                  Ver Detalles
+                </a>
+              </td>
+              <td class="border px-4 py-2 text-center whitespace-nowrap">
+                <form method="POST" action="{% url 'preparar_pedidos' %}" class="form-marcar-pendiente">
+                  {% csrf_token %}
+                  <input type="hidden" name="pedido_id" value="{{ pedido.id_pedido }}">
+                  <button type="submit" class="bg-green-500 hover:bg-green-700 text-white py-2 px-4 rounded w-30 text-center">
+                    Marcar como Pendiente
+                  </button>
+                </form>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Paginación -->
+    <div class="flex justify-center items-center mt-4">
+      <nav class="flex items-center space-x-2" aria-label="Pagination">
+        {% if page_obj.has_previous %}
+          <a href="?page={{ page_obj.previous_page_number }}" class="bg-gray-200 text-gray-600 hover:bg-gray-300 px-3 py-2 rounded-md">
+            &laquo;
+          </a>
+        {% else %}
+          <span class="bg-gray-200 text-gray-400 px-3 py-2 rounded-md cursor-not-allowed">
+            &laquo;
+          </span>
+        {% endif %}
+
+        {% for num in page_obj.paginator.page_range %}
+          {% if page_obj.number == num %}
+            <span class="bg-blue-500 text-white px-4 py-2 rounded-md">{{ num }}</span>
+          {% else %}
+            <a href="?page={{ num }}" class="bg-gray-200 text-gray-600 hover:bg-gray-300 px-3 py-2 rounded-md">{{ num }}</a>
+          {% endif %}
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+          <a href="?page={{ page_obj.next_page_number }}" class="bg-gray-200 text-gray-600 hover:bg-gray-300 px-3 py-2 rounded-md">
+            &raquo;
+          </a>
+        {% else %}
+          <span class="bg-gray-200 text-gray-400 px-3 py-2 rounded-md cursor-not-allowed">
+            &raquo;
+          </span>
+        {% endif %}
+      </nav>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+  <script src="{% static 'js/preparar_pedidos.js' %}"></script>
+{% endblock %}

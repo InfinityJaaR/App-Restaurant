@@ -8,13 +8,14 @@ from django.contrib import messages
 from django.contrib.auth import logout
 from django.core.paginator import Paginator
 from django.utils import timezone
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseBadRequest
 import json
 from django.utils import timezone
 from datetime import timedelta
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.core.exceptions import ValidationError
+from django.views.decorators.cache import never_cache
 
 # Create your views here.
 @login_required
@@ -208,46 +209,87 @@ def perfil_cliente(request):
     }
     return render(request, 'Cliente/perfil.html', context)
 
-# create views gestion_pedidos
+# Vista para preparar pedidos
 @login_required
-def gestion_pedidos(request):
-    # Obtener los pedidos pendientes, en proceso y repartidores disponibles desde la base de datos
-    pedidos_pendientes = Pedido.objects.filter(estado__nombre="Pendiente")
-    pedidos_en_proceso = Pedido.objects.filter(estado__nombre="En Proceso")
-    repartidores_disponibles = User.objects.filter(groups__name='Repartidor', mascampos__is_active=True)
+def preparar_pedidos(request):
+    if request.method == "POST":
+        # Procesar el formulario enviado por el método POST
+        pedido_id = request.POST.get("pedido_id")
+        if not pedido_id:
+            return JsonResponse({"success": False, "message": "ID de pedido no proporcionado."}, status=400)
 
-    if request.method == 'POST':
-        pedido_id = request.POST.get('pedido_id')
-        accion = request.POST.get('accion')
+        pedido = get_object_or_404(Pedido, id_pedido=pedido_id)
+
+        # Verificar que el estado "Pendiente" exista
+        estado_pendiente = Estado.objects.filter(nombre="Pendiente").first()
+        if not estado_pendiente:
+            return JsonResponse({"success": False, "message": "Estado 'Pendiente' no encontrado."}, status=404)
+
+        # Actualizar el estado del pedido
+        pedido.estado = estado_pendiente
+        pedido.save()
+
+        return JsonResponse({"success": True, "message": f"Pedido {pedido_id} ahora está en estado Pendiente."}, status=200)
+
+    # Mostrar la tabla con la paginación
+    pedidos_preparando = Pedido.objects.filter(estado__nombre="Preparando")
+    paginator = Paginator(pedidos_preparando, 6)  # Mostrar 6 pedidos por página
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+
+    return render(request, "EncargadoDeDespacho/preparar_pedidos.html", {"page_obj": page_obj})
+
+# Vista para obtener detalles del pedido (JSON para el frontend)
+@login_required
+def detalles_pedido(request, pedido_id):
+    try:
         pedido = Pedido.objects.get(id_pedido=pedido_id)
+        lineas = pedido.lineas.all()
+        context = {
+            "pedido": pedido,
+            "lineas": lineas,
+        }
+        return render(request, "EncargadoDeDespacho/detalles_pedido.html", context)
+    except Pedido.DoesNotExist:
+        messages.error(request, "Pedido no encontrado")
+        return redirect("preparar_pedidos")
 
-        if accion == 'en_proceso':
-            pedido.estado = Estado.objects.get(nombre="En Proceso")
+@login_required
+def asignar_pedidos(request):
+    pedidos_pendientes = Pedido.objects.filter(estado__nombre="Pendiente")
+    repartidores_disponibles = User.objects.filter(
+        groups__name="Repartidor", mascampos__is_active=True
+    )
+
+    # Paginación para pedidos pendientes
+    pedidos_paginator = Paginator(pedidos_pendientes, 3)  # Mostrar 3 pedidos por página
+    pedidos_page_number = request.GET.get('pedidos_page')
+    pedidos_page_obj = pedidos_paginator.get_page(pedidos_page_number)
+
+    if request.method == "POST":
+        pedido_id = request.POST.get("pedido_id")
+        pedido = Pedido.objects.get(id_pedido=pedido_id)
+        repartidor = repartidores_disponibles.first()
+
+        if repartidor:
+            pedido.repartidor = repartidor
+            pedido.estado = Estado.objects.get(nombre="En Camino")
+            repartidor.mascampos.is_active = False
+            repartidor.mascampos.save()
             pedido.save()
-            messages.success(request, f'Pedido {pedido.id_pedido} está ahora en proceso.')
+            messages.success(request, f"Pedido {pedido_id} asignado a {repartidor.first_name}.")
+        else:
+            messages.warning(request, f"No hay repartidores disponibles para el pedido {pedido_id}.")
 
-        elif accion == 'listo_para_despacho':
-            repartidor = repartidores_disponibles.first()
-            if repartidor:
-                # Asignar pedido al repartidor
-                pedido.usuario = repartidor
-                pedido.estado = Estado.objects.get(nombre="En Camino")
-                pedido.fecha = timezone.now()
-                pedido.save()
-                messages.success(request, f'Pedido {pedido.id_pedido} asignado a {repartidor.first_name} {repartidor.last_name} y está en camino.')
-            else:
-                # No hay repartidores disponibles, pedido sigue pendiente
-                pedido.estado = Estado.objects.get(nombre="Pendiente")
-                pedido.save()
-                messages.warning(request, f'No hay repartidores disponibles para el pedido {pedido.id_pedido}. El pedido quedará pendiente.')
+        return redirect("asignar_pedidos")
 
     context = {
-        'pedidos_pendientes': pedidos_pendientes,
-        'pedidos_en_proceso': pedidos_en_proceso,
-        'repartidores': repartidores_disponibles
+        "pedidos_page_obj": pedidos_page_obj,
+        "repartidores_disponibles": repartidores_disponibles,
     }
-    return render(request, 'EncargadoDeDespacho/gestion_pedidos.html', context)
+    return render(request, "EncargadoDeDespacho/asignar_pedidos.html", context)
 
+# Crear vista para el encargado de pedidos
 @login_required
 @csrf_exempt
 def registro_pedidos_no_registrados(request):
@@ -311,8 +353,9 @@ def registro_pedidos_no_registrados(request):
                     valor_puntos=0
                 )
 
-            # Actualizar subtotal del pedido
+            # Actualizar subtotal y total del pedido
             pedido.subtotal = subtotal
+            pedido.total = subtotal
             pedido.save()
 
             return JsonResponse({'message': 'Pedido registrado exitosamente', 'pedido_id': pedido.id_pedido}, status=201)
@@ -390,13 +433,20 @@ def gestionar_regalias(request):
 #Cliente
 def consultar_menu(request):
     platillos = Platillo.objects.all()
-    platillos_dia = Platillo.objects.filter(platillo_dia=True)
-    print(platillos_dia)
+    platillos_dia = Platillo.objects.filter(platillo_dia=True)    
     context = {
         'platillos': platillos,
         'platillos_dia': list(platillos_dia)
     }
     return render(request, 'Cliente/consultar_menu.html', context)
+
+@login_required
+def consultar_menu_dia(request):
+    platillos_dia = Platillo.objects.filter(platillo_dia=True)
+    context = {
+        'platillos_dia': platillos_dia
+    }
+    return render(request, 'Cliente/consultar_menu_dia.html', context)
 
 def obtener_carrito(request):
     """Obtiene el carrito del usuario si está autenticado o crea uno temporal para no autenticados."""
@@ -437,7 +487,7 @@ def agregar_carrito(request, platillo_id):
     item.actualizar_total()
 
     return redirect('ver_carrito')
-
+@never_cache
 def ver_carrito(request):
     """Mostrar los items en el carrito del usuario"""
     carrito = obtener_carrito(request)
@@ -523,6 +573,7 @@ def vaciar_carrito(request):
     carrito.items.all().delete()  # Eliminar todos los items del carrito
     return redirect('ver_carrito')
 
+@never_cache
 @login_required(login_url='/accounts/login/') 
 def registro_pedido_cliente(request):
 
@@ -554,8 +605,10 @@ def registro_pedido_cliente(request):
             items = carrito.items.all()
             
             tipo_pago=request.POST.get('tipo_pago')
+            cuponAux=request.POST.get('cupon')
             total = 0
             total_puntos = 0
+            subtotal=0            
             recompensa_puntos = 0  # Inicializamos la variable aquí
             carrito = obtener_carrito(request) 
             items = carrito.items.all()
@@ -607,24 +660,91 @@ def registro_pedido_cliente(request):
                         total_orden=subtotal_orden,
                         valor_puntos=puntos_orden
                     )
-                    # Verificar si el usuario desea pagar con puntos                 
+                    
+                    subtotal = total                            
+                    if cuponAux!="":                        
+                        try:         
+                            print(cuponAux)
+                            cupon = Cupon.objects.get(codigo=cuponAux)
+                            print(cupon)                    
+                            if cupon.disponibilidad and cupon.fecha_expiracion >= timezone.now().date():
+                                subtotal = total
+                                total = cupon.aplicar_descuento(total)   
+                                cupon.disponibilidad = False
+                                cupon.save()                                         
+                            else:                        
+                                total = sum(item.total for item in items)
+                                for item in items:
+                                    platillo = item.platillo
+                                    cantidad = item.cantidad
+                                    total_puntos += platillo.precio_puntos * cantidad                            
+                                render_button = True
+                                messages.error(request, "El cupón no es válido o ha caducado.")                        
+                                return render(request, 'Cliente/registro_pedido.html', {
+                                    'platillos': platillos,
+                                    'carrito_items': carrito.items.all(),
+                                    'total': total,
+                                    'usuario': datos_usuario,
+                                    'render_button':render_button,
+                                    'total_puntos':total_puntos,
+                                    })                        
+                        except Cupon.DoesNotExist as e:                                                   
+                            total = sum(item.total for item in items)
+                            for item in items:
+                                platillo = item.platillo
+                                cantidad = item.cantidad
+                                total_puntos += platillo.precio_puntos * cantidad                            
+                                render_button = True
+                                messages.error(request, "El cupón no existe.")                        
+                                return render(request, 'Cliente/registro_pedido.html', {
+                                    'platillos': platillos,
+                                    'carrito_items': carrito.items.all(),
+                                    'total': total,
+                                    'usuario': datos_usuario,
+                                    'render_button':render_button,
+                                    'total_puntos':total_puntos,
+                                    })                    
+                    
+                # Verificar si el usuario desea pagar con puntos                 
                 if tipo_pago == 'puntos':
-                    if request.user.puntos.puntos_acumulados >= total_puntos:
-                        pedido.total = 0
-                        pedido.total_puntos = total_puntos
-                        request.user.puntos.puntos_acumulados -= total_puntos
-                        request.user.puntos.save()
+                    puntos_usuario = request.user.puntos  
+                    if puntos_usuario.son_validos():  
+                        if puntos_usuario.puntos_acumulados >= total_puntos:
+                               pedido.total = 0
+                               pedido.total_puntos = total_puntos
+                               puntos_usuario.puntos_acumulados -= total_puntos
+                               puntos_usuario.save()
+                               pedido.total = total  
+                               pedido.subtotal = total
+                               pedido.save()                                                
+                               messages.success(request, 'Registro exitoso. Pedido ID: #'+ str(pedido.id_pedido))  
+                               render_button=False         
+                               form_render=False   
+                               carrito = obtener_carrito(request) 
+                               carrito.items.all().delete()            
+                               return render (request,'Cliente/registro_pedido.html',{'render_button':render_button,'form_render':form_render})                                    
+                        else:
+                            render_button = True
+                            messages.warning(request, 'No tienes suficientes puntos para realizar la compra')
+                            return render(request, 'Cliente/registro_pedido.html', {
+                                    'platillos': platillos,
+                                    'carrito_items': carrito.items.all(),
+                                    'total': total,
+                                    'usuario': datos_usuario,
+                                    'render_button': render_button,
+                                    'total_puntos': total_puntos,
+                                    })
                     else:
-                        render_button = True
-                        messages.warning(request, 'No tienes suficientes puntos para realizar la compra')  
-                        return render(request, 'Cliente/registro_pedido.html', {
-                            'platillos': platillos,
-                            'carrito_items': carrito.items.all(),
-                            'total': total,
-                            'usuario': datos_usuario,
-                            'render_button':render_button,
-                            'total_puntos':total_puntos,
-                            })
+                         render_button = True
+                         messages.warning(request, 'Tus puntos han caducado o no están disponibles.')
+                         return render(request, 'Cliente/registro_pedido.html', {
+                              'platillos': platillos,
+                              'carrito_items': carrito.items.all(),
+                              'total': total,
+                              'usuario': datos_usuario,
+                              'render_button': render_button,
+                              'total_puntos': total_puntos,
+                              })
                 else:                    
                     if puntos_usuario:                 
                         puntos_usuario.puntos_acumulados += recompensa_puntos
@@ -636,7 +756,7 @@ def registro_pedido_cliente(request):
                         )
                            
                     pedido.total = total  # Si paga en efectivo o con tarjeta, total es el total calculado
-                    pedido.subtotal = total
+                    pedido.subtotal = subtotal
                     pedido.save()                                                
                     puntos_usuario.save()                                    
                     
@@ -673,3 +793,19 @@ def registro_pedido_cliente(request):
         'render_button':render_button,
         'total_puntos':total_puntos,
     })
+
+@login_required
+def gestionar_platillos(request):
+    platillos = Platillo.objects.all()
+    context = {
+        'platillos': platillos
+    }
+    return render(request, 'CatalogoYMenu/catalogo.html', context)
+
+@login_required
+def menu_diario(request):
+    platillos = Platillo.objects.all()
+    context = {
+        'platillos': platillos
+    }
+    return render(request, 'CatalogoYMenu/menudia.html', context)

@@ -1,19 +1,8 @@
-img.w-full.h-50.object-cover.mb-4 {
-    border-top-left-radius: 10px;
-    border-top-right-radius: 10px;
+.btn-black:hover{
+  background: #ffd700 !important;
+  color: #1a1a1a !important;
 }
 
- .swiper-wrapper {
-    width: 100%;
-    height: max-content !important;
-    padding-bottom: 64px !important;
-    -webkit-transition-timing-function: linear !important;
-    transition-timing-function: linear !important;
-    position: relative;
-  }
-  .swiper-pagination-bullet {
-    background: #0d0c2b;
-  }
-  .swiper-pagination-bullet-active {
-    background: #0d0c2b !important;
-  }
+.btn-red:hover{
+  background: rgb(202 34 34) !important;  
+}
