@@ -904,7 +904,7 @@ def gestionar_platillos(request):
 
 @login_required
 def menu_diario(request):
-    platillos = Platillo.objects.all()
+    platillos = Platillo.objects.filter(platillo_dia=True)
     context = {
         'platillos': platillos
     }
