@@ -3,6 +3,7 @@
 
 {% block head %}
 <title>Gestionar Catálogo</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="{% static 'css/catalogo.css' %}">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
 {% endblock %}
@@ -40,8 +41,8 @@
                         <img src="{{ platillo.imagen.url }}" alt="{{ platillo.nombre }}">
                         <div class="card-body">
                             <h2>{{ platillo.nombre }}</h2>
-                            <button class="btn-edit">Editar</button>
-                            <button class="btn-delete">Eliminar</button>
+                            <a href="{% url 'editar_platillo' platillo.id_platillo %}" class="btn-edit">Editar</a>
+                            <button class="btn-delete" onclick="openModal('{{ platillo.id_platillo }}')">Eliminar</button>
                         </div>
                     </div>
                 </div>
@@ -54,4 +55,42 @@
         </div>
     </div>
 </div>
+
+<!-- Modal -->
+<div id="deleteModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <h2 style="font-weight: 600; margin-top: 3rem;">Confirmar Borrado</h2>
+        <p>¿Estás seguro de que deseas eliminar este platillo?</p>
+        <div class="modal-buttons">
+            <button class="btn-confirm" id="confirmDelete">Confirmar</button>
+            <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function openModal(platilloId) {
+        var modal = document.getElementById("deleteModal");
+        modal.style.display = "block";
+        document.getElementById("confirmDelete").onclick = function() {
+            window.location.href = "{% url 'eliminar_platillo' 0 %}";
+        };
+    }
+
+    function closeModal() {
+        var modal = document.getElementById("deleteModal");
+        modal.style.display = "none";
+    }
+
+    window.onclick = function(event) {
+        var modal = document.getElementById("deleteModal");
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+</script>
 {% endblock %}

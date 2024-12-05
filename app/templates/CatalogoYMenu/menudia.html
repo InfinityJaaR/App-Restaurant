@@ -3,8 +3,10 @@
 
 {% block head %}
 <title>Menú del Día</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="{% static 'css/menudia.css' %}">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 {% endblock %}
 
 {% block content %}
@@ -23,11 +25,32 @@
         </div>
         {% endif %}
 
-        <div class="menu-container">
-
-          
+        <div class="barra">
+            <h2 class="barra-texto">Platillos seleccionados para hoy</h2>
+            <a class="barra-updtbtn" href="{% url 'menu_diario' %}"><i class="fa fa-cloud-download" 
+                style="margin-right: 0.5rem;"></i>Actualizar</a>
         </div>
 
+        <div class="menu-container">
+            <div class="row">
+                {% for platillo in platillos %}
+                <div class="col-3">
+                    <div class="card">
+                        <img src="{{ platillo.imagen.url }}" alt="{{ platillo.nombre }}">
+                        <div class="card-body">
+                            <h2>{{ platillo.nombre }}</h2>
+                            <p>Precio: ${{ platillo.precio }}</p>
+                            <p>Precio con puntos: {{ platillo.precio_puntos }} puntos</p>
+                        </div>
+                    </div>
+                </div>
+                {% if forloop.counter|divisibleby:4 and not forloop.last %}
+            </div>
+            <div class="row">
+                {% endif %}
+                {% endfor %}
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}
