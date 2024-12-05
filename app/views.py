@@ -57,6 +57,7 @@ def registro(request):
         if password == password2:
             if User.objects.filter(username=email).exists():
                 messages.error(request, 'El email ya está registrado')
+                return redirect('login')  # Cambiado de render a redirect
             else:
                 user = User.objects.create_user(username=email, email=email, password=password, first_name=nombre)
                 user.save()
@@ -67,7 +68,8 @@ def registro(request):
                 return redirect('login')
         else:
             messages.error(request, 'Las contraseñas no coinciden')
-    return render(request, 'login')
+            return redirect('login')  # Cambiado de render a redirect
+    return redirect('login')  # Cambiado de render a redirect para el caso GET
 
 @login_required
 def nuevoUsuario(request, id=None):
@@ -420,6 +422,30 @@ def crear_cupon(request):
         messages.success(request, 'Cupón creado exitosamente.')
         return redirect('gestionar_regalias')
 
+def eliminar_cupon(request, id_cupon):
+    cupon = get_object_or_404(Cupon, id_cupon=id_cupon)
+    if request.method == 'POST':
+        cupon.delete()
+        messages.success(request, 'Cupon eliminado correctamente.')
+        return redirect('gestionar_regalias')  # Cambia al nombre de tu vista correspondiente
+    return JsonResponse({'error': 'Método no permitido'}, status=405)
+
+@csrf_exempt
+def editar_cupon(request):
+    if request.method == 'POST':
+        id_cupon = request.POST.get('id_cupon')
+        codigo = request.POST.get('codigo')
+        descuento = request.POST.get('descuento')
+        fecha_expiracion = request.POST.get('fecha_expiracion')
+        cupon = get_object_or_404(Cupon, id_cupon=id_cupon)
+        cupon.codigo = codigo
+        cupon.descuento = descuento
+        cupon.fecha_expiracion = fecha_expiracion
+        cupon.save()
+        messages.success(request, 'Cupon modificado correctamente.')
+        return redirect('gestionar_regalias')  # Cambia al nombre de tu vista correspondiente
+    return JsonResponse({'error': 'Método no permitido'}, status=405)
+
 def gestionar_regalias(request):
     cupones_list = Cupon.objects.all()
     query = request.GET.get('q')
@@ -434,19 +460,27 @@ def gestionar_regalias(request):
 
 #Cliente
 def consultar_menu(request):
+    carrito = obtener_carrito(request)
+    items = carrito.items.all()
+    total = sum(item.total for item in items)
     platillos = Platillo.objects.all()
     platillos_dia = Platillo.objects.filter(platillo_dia=True)    
     context = {
         'platillos': platillos,
-        'platillos_dia': list(platillos_dia)
+        'platillos_dia': list(platillos_dia),
+        'total':total
     }
     return render(request, 'Cliente/consultar_menu.html', context)
 
 @login_required
 def consultar_menu_dia(request):
+    carrito = obtener_carrito(request)
+    items = carrito.items.all()
+    total = sum(item.total for item in items)
     platillos_dia = Platillo.objects.filter(platillo_dia=True)
     context = {
-        'platillos_dia': platillos_dia
+        'platillos_dia': platillos_dia,
+        'total':total
     }
     return render(request, 'Cliente/consultar_menu_dia.html', context)
 
