@@ -3,7 +3,7 @@
 
 {% block head %}
     <title>Registro de Pedido - Queiques</title>
-    <link rel="stylesheet" href="{% static 'css/perfil.css' %}">
+    <link href="{% static 'css/menu.css' %}" rel="stylesheet" >
 {% endblock %}
 
 {% block content %}
@@ -33,7 +33,7 @@
     <form action="{% url 'registro_pedido_cliente'%}" method="POST"  class="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-md">
         <div class="max-w-4xl mx-auto mb-4">
             <div class="flex space-x-4 mt-4">    
-                <a href="{% url 'consultar_menu' %}" class="bg-black text-white px-4 py-2 rounded"> <i class="fa-solid fa-arrow-left mr-4"></i> Seguir consultando mas platillos</a>        
+                <a href="{% url 'consultar_menu' %}" class="bg-black text-white px-4 py-2 rounded transition duration-100 btn-black" > <i class="fa-solid fa-arrow-left mr-4"></i> Seguir consultando mas platillos</a>        
             </div>
         </div>
         {% csrf_token %}
@@ -71,8 +71,8 @@
         </div>
                        
         <div class="mb-5">
-            <label for="codigo_cupon" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Código del cupón</label>
-            <input type="text" id="codigo_cupon" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+            <label for="cupon" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Código del cupón</label>
+            <input type="text" id="cupon" name="cupon" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
         </div>
 
         <div class="mb-12">
@@ -80,7 +80,7 @@
             <h3 class="text-xl font-medium">Total en Puntos :<span class="font-bold text-lg"> {{ total_puntos }}</span></h3>
         </div>
         {% if render_button %}    
-        <button type="submit" class="w-full py-2 px-4 bg-black text-white font-semibold rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+        <button type="submit" class="w-full py-2 px-4 bg-black text-white font-semibold rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-100 btn-black">
             <i class="fa-solid fa-check mr-2"></i> Confirmar Pedido
         </button>
         {% endif %}
