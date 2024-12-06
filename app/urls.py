@@ -45,7 +45,4 @@ urlpatterns = [
     path('gestion_platillos/editar/<int:platillo_id>/', editar_platillo, name='editar_platillo'),
     path('gestion_platillos/eliminar/<int:platillo_id>/', eliminar_platillo, name='eliminar_platillo'),
     path('menu_dia/', menu_diario, name='menu_diario'),
-]
-
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+]+static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
