@@ -89,7 +89,7 @@
                         {% for cupon in cupones %}
                         <tr>
                             <td class="p-4 border text-center">{{ cupon.codigo }}</td>
-                            <td class="p-4 border text-center">{{ cupon.descuento }}</td>
+                            <td class="p-4 border text-center">{{ cupon.descuento }}%</td>
                             <td class="p-4 border text-center">{{ cupon.fecha_expiracion }}</td>
                             <td class="p-4 border text-center">{{ cupon.disponibilidad|yesno:"Disponible,No disponible" }}</td>
                             <td class="p-4 border flex gap-2 justify-center items-center">
