@@ -1,6 +1,8 @@
 from django.urls import path
 from .views import *
 from . import views
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('', home, name='home'),
@@ -44,3 +46,6 @@ urlpatterns = [
     path('gestion_platillos/eliminar/<int:platillo_id>/', eliminar_platillo, name='eliminar_platillo'),
     path('menu_dia/', menu_diario, name='menu_diario'),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
