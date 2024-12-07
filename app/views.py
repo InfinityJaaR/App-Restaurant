@@ -158,7 +158,8 @@ def perfil(request):
         nuevo_estado = request.POST.get('disponibilidad')
         request.user.mascampos.is_active = bool(int(nuevo_estado))
         request.user.mascampos.save()  # Save the MasCampos instance
-        messages.success(request, 'Estado actualizado correctamente')
+        estado = "Disponible" if request.user.mascampos.is_active else "No Disponible"
+        messages.success(request, f'Estado actualizado correctamente a {estado}')
         return redirect('repartidor')
 
     return render(request, 'Repartidor/perfil.html', {'user': request.user})
