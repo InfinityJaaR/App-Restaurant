@@ -916,7 +916,7 @@ def agregar_platillo(request):
     if request.method == 'POST':
         nombre = request.POST.get('nombre')
         descripcion = request.POST.get('descripcion')
-        imagen = request.FILES.get('imagen')
+        imagen = request.POST.get('imagen')
         precio = request.POST.get('precio')
         precio_puntos = request.POST.get('precio_puntos')
         recompensa_puntos = request.POST.get('recompensa_puntos')
@@ -944,8 +944,7 @@ def editar_platillo(request, platillo_id):
     if request.method == 'POST':
         platillo.nombre = request.POST.get('nombre')
         platillo.descripcion = request.POST.get('descripcion')
-        if 'imagen' in request.FILES:
-            platillo.imagen = request.FILES['imagen']
+        platillo.imagen = request.POST.get('imagen')  # Cambiado a POST en lugar de FILES
         platillo.precio = request.POST.get('precio')
         platillo.precio_puntos = request.POST.get('precio_puntos')
         platillo.recompensa_puntos = request.POST.get('recompensa_puntos')

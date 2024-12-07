@@ -41,16 +41,14 @@
                     <div class="card" style="margin-top: 1rem;">
                         <!-- Mostrar imagen del platillo -->
                         {% if platillo.imagen %}
-                            <img src="{{ platillo.imagen.url }}" alt="{{ platillo.nombre }}" class="card-img">
+                            <img src="{{ platillo.imagen }}" alt="{{ platillo.nombre }}" class="card-img">
                         {% else %}
                             <img src="{% static 'img/default-placeholder.png' %}" alt="Imagen no disponible" class="card-img">
                         {% endif %}
                         <div class="card-body">
-                            <h2 class="card-title" style="margin: top;">{{ platillo.nombre }}</h2>
-                            <div class="btn-container">
-                                <a href="{% url 'editar_platillo' platillo.id_platillo %}" class="btn-edit">Editar</a>
-                                <button class="btn-delete" onclick="openModal('{{ platillo.id_platillo }}')">Eliminar</button>
-                            </div>
+                            <h2 class="card-title">{{ platillo.nombre }}</h2>
+                            <a href="{% url 'editar_platillo' platillo.id_platillo %}" class="btn-edit">Editar</a>
+                            <button class="btn-delete" onclick="openModal('{{ platillo.id_platillo }}')">Eliminar</button>
                         </div>
                     </div>
                 </div>

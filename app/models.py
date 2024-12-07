@@ -41,7 +41,7 @@ class Platillo(models.Model):
     id_platillo = models.AutoField(primary_key=True)
     nombre = models.CharField(max_length=256)
     descripcion = models.TextField()
-    imagen = models.ImageField(upload_to="platillos/")
+    imagen = models.URLField(max_length=2048, blank=True, null=True)
     precio = models.DecimalField(max_digits=10, decimal_places=2)
     precio_puntos = models.IntegerField()
     recompensa_puntos = models.IntegerField()
